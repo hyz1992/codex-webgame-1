@@ -49,10 +49,6 @@ body {
 
 .primary-action {
   pointer-events: auto;
-  position: absolute;
-  left: 50%;
-  bottom: 96px;
-  transform: translateX(-50%);
   min-width: 144px;
   min-height: 48px;
   border: 0;
@@ -70,4 +66,108 @@ body {
   width: 260px;
   max-height: calc(100vh - 32px);
   overflow: auto;
+}
+
+.hud-bar {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.hud-bar span:last-child {
+  text-align: right;
+}
+
+.boost-bar {
+  position: absolute;
+  top: max(42px, calc(env(safe-area-inset-top) + 30px));
+  left: 64px;
+  right: 64px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(248, 250, 252, 0.22);
+}
+
+.boost-bar span {
+  display: block;
+  height: 100%;
+  background: #63d2ff;
+}
+
+.pause-button {
+  pointer-events: auto;
+  position: absolute;
+  top: max(54px, calc(env(safe-area-inset-top) + 42px));
+  right: 12px;
+  width: 52px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.16);
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.menu-screen {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(16, 24, 32, 0.62);
+}
+
+.menu-screen.compact {
+  background: rgba(16, 24, 32, 0.72);
+}
+
+.menu-screen h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.menu-screen p {
+  margin: 0;
+  font-size: 18px;
+}
+
+.secondary-action {
+  pointer-events: auto;
+  min-width: 144px;
+  min-height: 44px;
+  border: 1px solid rgba(248, 250, 252, 0.4);
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.1);
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.result-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.result-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.result-list dt,
+.result-list dd {
+  margin: 0;
 }

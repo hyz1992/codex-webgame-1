@@ -2,8 +2,10 @@ import Phaser from 'phaser';
 import './styles.css';
 import { GAME_HEIGHT, GAME_WIDTH } from './game/config';
 import { InputController } from './game/input/InputController';
-import { GameScene } from './game/scenes/GameScene';
+import { GameScene, RUN_STATE_EVENT } from './game/scenes/GameScene';
 import type { GameAction } from './game/actions';
+import type { RunState } from './game/state';
+import { HudOverlay } from './ui/HudOverlay';
 
 const gameRoot = document.querySelector<HTMLDivElement>('#game-root');
 const hudRoot = document.querySelector<HTMLDivElement>('#hud-root');
@@ -39,10 +41,9 @@ if (!phoneFrame) {
 const input = new InputController(phoneFrame, sendAction);
 input.bind();
 
-hudRoot.innerHTML = '<button class="primary-action" type="button" data-action="confirm">开始游戏</button>';
-hudRoot.addEventListener('click', (event) => {
-  const target = event.target;
-  if (target instanceof HTMLElement && target.dataset.action === 'confirm') {
-    sendAction('confirm');
-  }
+const hud = new HudOverlay(hudRoot, sendAction);
+hud.mount();
+
+game.events.on(RUN_STATE_EVENT, (state: RunState) => {
+  hud.update(state);
 });
