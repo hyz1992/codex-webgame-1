@@ -6,11 +6,13 @@ import { GameScene, RUN_STATE_EVENT } from './game/scenes/GameScene';
 import type { GameAction } from './game/actions';
 import type { RunState } from './game/state';
 import { HudOverlay } from './ui/HudOverlay';
+import { DebugPanel } from './ui/DebugPanel';
 
 const gameRoot = document.querySelector<HTMLDivElement>('#game-root');
 const hudRoot = document.querySelector<HTMLDivElement>('#hud-root');
+const debugRoot = document.querySelector<HTMLElement>('#debug-root');
 
-if (!gameRoot || !hudRoot) {
+if (!gameRoot || !hudRoot || !debugRoot) {
   throw new Error('缺少游戏挂载节点');
 }
 
@@ -27,7 +29,10 @@ const game = new Phaser.Game({
   scene: [GameScene],
 });
 
+let debugPanel: DebugPanel | null = null;
+
 const sendAction = (action: GameAction): void => {
+  debugPanel?.recordInput(action);
   const scene = game.scene.getScene('GameScene');
   scene.events.emit('game-action', action);
 };
@@ -44,6 +49,10 @@ input.bind();
 const hud = new HudOverlay(hudRoot, sendAction);
 hud.mount();
 
+debugPanel = new DebugPanel(debugRoot, sendAction);
+debugPanel.mount();
+
 game.events.on(RUN_STATE_EVENT, (state: RunState) => {
   hud.update(state);
+  debugPanel?.update(state);
 });
