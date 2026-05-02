@@ -4,6 +4,7 @@ import type { LaneItem } from '../spawn/patterns';
 import { getLaneItemVisual, neonSunsetTheme } from './theme';
 import { PerspectiveProjector } from './PerspectiveProjector';
 import { ITEM_GROUND_SHADOW_ALPHA, ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from './layout';
+import { getObstacleVisualProfile } from './obstacleVisualProfile';
 
 export interface PlayerVisual {
   container: Phaser.GameObjects.Container;
@@ -168,7 +169,9 @@ export class GameVisualFactory {
     const spawn = this.projector.projectLaneAtProgress(item.lane, roadProgress);
     const container = this.scene.add.container(spawn.x, spawn.y);
     const hitArea = this.scene.add.rectangle(0, -22, 44, 44, fill, 0);
-    const shadow = this.scene.add.ellipse(0, 0, 62, 14, 0x020817, ITEM_GROUND_SHADOW_ALPHA);
+    const profile = getObstacleVisualProfile(item.kind);
+    const shadowWidth = profile ? profile.width * 1.08 : 62;
+    const shadow = this.scene.add.ellipse(0, 0, shadowWidth, 14, 0x020817, ITEM_GROUND_SHADOW_ALPHA);
     shadow.setStrokeStyle(1, glow, 0.18);
     container.add(shadow);
 
@@ -181,17 +184,31 @@ export class GameVisualFactory {
       gem.setStrokeStyle(2, glow, 0.82);
       container.add(gem);
     } else if (visual.shape === 'beam') {
-      const beam = this.scene.add.rectangle(0, -18, 118, 18, fill, 1);
-      beam.setStrokeStyle(2, glow, 0.9);
-      hitArea.setY(-18);
-      hitArea.setSize(118, 24);
-      container.add(beam);
+      const gate = profile ?? { width: 124, height: 68, hitArea: { y: -30, width: 122, height: 28 } };
+      const leftPost = this.scene.add.rectangle(-gate.width / 2 + 10, -gate.height / 2, 8, gate.height, fill, 0.72);
+      const rightPost = this.scene.add.rectangle(gate.width / 2 - 10, -gate.height / 2, 8, gate.height, fill, 0.72);
+      const crossBeam = this.scene.add.rectangle(0, gate.hitArea.y, gate.width, gate.hitArea.height, fill, 1);
+      const topGlow = this.scene.add.rectangle(0, -gate.height + 8, gate.width * 0.86, 6, glow, 0.48);
+      leftPost.setStrokeStyle(2, glow, 0.7);
+      rightPost.setStrokeStyle(2, glow, 0.7);
+      crossBeam.setStrokeStyle(2, glow, 0.95);
+      topGlow.setStrokeStyle(1, glow, 0.65);
+      hitArea.setY(gate.hitArea.y);
+      hitArea.setSize(gate.hitArea.width, gate.hitArea.height);
+      container.add([leftPost, rightPost, crossBeam, topGlow]);
     } else if (visual.shape === 'low-fence') {
-      const fence = this.scene.add.rectangle(0, -11, 54, 22, fill, 1);
-      fence.setStrokeStyle(2, glow, 0.84);
-      hitArea.setY(-11);
-      hitArea.setSize(54, 26);
-      container.add(fence);
+      const fenceProfile = profile ?? { width: 76, height: 58, hitArea: { y: -14, width: 68, height: 30 } };
+      const leftStrut = this.scene.add.rectangle(-fenceProfile.width / 2 + 12, -fenceProfile.height / 2, 9, fenceProfile.height, fill, 0.72);
+      const rightStrut = this.scene.add.rectangle(fenceProfile.width / 2 - 12, -fenceProfile.height / 2, 9, fenceProfile.height, fill, 0.72);
+      const lowerRail = this.scene.add.rectangle(0, fenceProfile.hitArea.y, fenceProfile.width, fenceProfile.hitArea.height, fill, 1);
+      const crown = this.scene.add.polygon(0, -fenceProfile.height + 8, [-24, 8, 0, -8, 24, 8], glow, 0.42);
+      leftStrut.setStrokeStyle(2, glow, 0.68);
+      rightStrut.setStrokeStyle(2, glow, 0.68);
+      lowerRail.setStrokeStyle(2, glow, 0.9);
+      crown.setStrokeStyle(1, glow, 0.72);
+      hitArea.setY(fenceProfile.hitArea.y);
+      hitArea.setSize(fenceProfile.hitArea.width, fenceProfile.hitArea.height);
+      container.add([leftStrut, rightStrut, lowerRail, crown]);
     } else if (visual.shape === 'rift') {
       const rift = this.scene.add.polygon(0, -24, [-16, -24, 16, -14, 4, 0, 18, 24, -18, 14, -5, 0], fill, 1);
       rift.setStrokeStyle(2, glow, 0.95);
