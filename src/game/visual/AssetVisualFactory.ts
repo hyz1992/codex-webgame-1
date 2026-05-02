@@ -9,7 +9,6 @@ import {
   ITEM_VISUAL_SCALE,
   SUNSET_BACKGROUND_Y_OFFSET,
 } from './layout';
-import { usesProgrammaticObstacleVisual } from './obstacleVisualProfile';
 import { PerspectiveProjector } from './PerspectiveProjector';
 
 export class AssetVisualFactory {
@@ -58,10 +57,6 @@ export class AssetVisualFactory {
   }
 
   createLaneItem(item: LaneItem): MovingVisualItem {
-    if (usesProgrammaticObstacleVisual(item.kind)) {
-      return this.fallback.createLaneItem(item);
-    }
-
     const asset = getLaneItemAsset(item.kind);
     if (!this.hasTexture(asset.key)) {
       return this.fallback.createLaneItem(item);

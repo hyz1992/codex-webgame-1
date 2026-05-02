@@ -58,6 +58,11 @@ export class PerspectiveProjector {
     };
   }
 
+  movementRateAtProgress(progress: number): number {
+    const t = this.smoothstep(0.22, 0.78, this.clamp01(progress));
+    return this.lerp(1.38, 0.32, t);
+  }
+
   trackPolygon(): TrackPolygon {
     const top = this.projectLane(1, this.horizonY);
     const bottom = this.projectLane(1, this.bottomY);
@@ -106,5 +111,10 @@ export class PerspectiveProjector {
 
   private lerp(from: number, to: number, t: number): number {
     return from + (to - from) * t;
+  }
+
+  private smoothstep(edge0: number, edge1: number, value: number): number {
+    const t = this.clamp01((value - edge0) / (edge1 - edge0));
+    return t * t * (3 - 2 * t);
   }
 }

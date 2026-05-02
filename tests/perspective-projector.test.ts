@@ -122,4 +122,15 @@ describe('PerspectiveProjector', () => {
 
     expect(near.scale / spawn.scale).toBeCloseTo(nearOffset / spawnOffset, 4);
   });
+
+  it('starts decelerating projected obstacle motion before the near end', () => {
+    const projector = new PerspectiveProjector();
+    const earlyRate = projector.movementRateAtProgress(0.15);
+    const midRate = projector.movementRateAtProgress(0.5);
+    const lateRate = projector.movementRateAtProgress(0.85);
+
+    expect(earlyRate).toBeGreaterThan(midRate);
+    expect(midRate).toBeGreaterThan(lateRate);
+    expect(lateRate).toBeLessThan(earlyRate * 0.35);
+  });
 });

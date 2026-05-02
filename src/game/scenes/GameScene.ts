@@ -155,9 +155,11 @@ export class GameScene extends Phaser.Scene {
     const playerMotion = this.laneController.snapshot().motion;
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
-    const progressDelta = pixels / (this.projector.bottomY - this.projector.horizonY);
 
     for (const item of this.items) {
+      const progressDelta =
+        (pixels / (this.projector.bottomY - this.projector.horizonY)) *
+        this.projector.movementRateAtProgress(item.roadProgress);
       item.roadProgress += progressDelta;
       this.projectMovingItem(item);
 

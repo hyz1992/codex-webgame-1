@@ -15,7 +15,7 @@ export interface ObstacleVisualProfile {
 const obstacleVisualProfiles = {
   lowFence: {
     width: 76,
-    height: 58,
+    height: 64,
     hitArea: {
       y: -14,
       width: 68,
@@ -23,11 +23,11 @@ const obstacleVisualProfiles = {
     },
   },
   beam: {
-    width: 124,
-    height: 68,
+    width: 84,
+    height: 72,
     hitArea: {
       y: -30,
-      width: 122,
+      width: 82,
       height: 28,
     },
   },
@@ -38,5 +38,6 @@ export function getObstacleVisualProfile(kind: LaneItem['kind']): ObstacleVisual
 }
 
 export function usesProgrammaticObstacleVisual(kind: LaneItem['kind']): boolean {
-  return getObstacleVisualProfile(kind) !== undefined;
+  void kind;
+  return false;
 }

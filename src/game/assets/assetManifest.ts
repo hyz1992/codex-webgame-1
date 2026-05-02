@@ -96,7 +96,7 @@ export const gameAssetManifest = {
     {
       key: 'obstacle-low-fence',
       path: '/assets/game/obstacle-low-fence.png',
-      display: { width: 58, height: 28 },
+      display: { width: 76, height: 64 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'item',
       laneItemKind: 'lowFence',
@@ -104,7 +104,7 @@ export const gameAssetManifest = {
     {
       key: 'obstacle-beam',
       path: '/assets/game/obstacle-beam.png',
-      display: { width: 118, height: 26 },
+      display: { width: 84, height: 72 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'item',
       laneItemKind: 'beam',
