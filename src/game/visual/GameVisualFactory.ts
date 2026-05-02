@@ -3,6 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { getLaneItemVisual, neonSunsetTheme } from './theme';
 import { PerspectiveProjector } from './PerspectiveProjector';
+import { PLAYER_ANCHOR_Y } from './layout';
 
 export interface PlayerVisual {
   container: Phaser.GameObjects.Container;
@@ -154,7 +155,7 @@ export class GameVisualFactory {
     trail.setOrigin(0.5, 0);
     shieldRing.setStrokeStyle(2, 0x7ee787, 0);
 
-    const container = this.scene.add.container(LANE_X[1], GAME_HEIGHT - 132, [trail, body, core, shieldRing, hitArea]);
+    const container = this.scene.add.container(LANE_X[1], PLAYER_ANCHOR_Y, [trail, body, core, shieldRing, hitArea]);
     container.setDepth(4);
     return { container, body, core, trail, shieldRing, hitArea };
   }

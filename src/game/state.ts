@@ -2,6 +2,8 @@ import {
   BASE_SPEED,
   BOOST_DURATION_MS,
   BOOST_METER_MAX,
+  DEBUG_MODE_SHIELDS,
+  DEFAULT_SHIELDS,
   DISTANCE_SCORE_STEP,
   ENERGY_SCORE,
   MAX_SPEED,
@@ -24,13 +26,17 @@ export interface RunState {
   isGameOver: boolean;
 }
 
-export function createInitialRunState(): RunState {
+export interface CreateRunStateOptions {
+  debug?: boolean;
+}
+
+export function createInitialRunState(options: CreateRunStateOptions = {}): RunState {
   return {
     hasStarted: false,
     score: 0,
     distance: 0,
     speed: BASE_SPEED,
-    shields: 1,
+    shields: options.debug ? DEBUG_MODE_SHIELDS : DEFAULT_SHIELDS,
     combo: 0,
     bestCombo: 0,
     boostMeter: 0,
@@ -49,8 +55,8 @@ export function startRun(state: RunState): RunState {
   };
 }
 
-export function resetRun(_state: RunState): RunState {
-  return createInitialRunState();
+export function resetRun(_state: RunState, options: CreateRunStateOptions = {}): RunState {
+  return createInitialRunState(options);
 }
 
 export function addDistance(state: RunState, distanceDelta: number): RunState {

@@ -9,7 +9,9 @@ import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
+import { PLAYER_ANCHOR_Y } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
+import { playerRunPose } from '../visual/playerRunPose';
 
 export const RUN_STATE_EVENT = 'run-state-change';
 const GAME_ACTION_EVENT = 'game-action';
@@ -21,7 +23,7 @@ export class GameScene extends Phaser.Scene {
   private effects!: EffectController;
   private readonly projector = new PerspectiveProjector();
   private debugGraphics?: Phaser.GameObjects.Graphics;
-  private readonly debugHitboxesEnabled = new URLSearchParams(window.location.search).get('debug') === '1';
+  private readonly debugModeEnabled = new URLSearchParams(window.location.search).get('debug') === '1';
   private laneController = new LaneController();
   private runState: RunState = createInitialRunState();
   private spawner = new ObstacleSpawner(1);
@@ -46,7 +48,7 @@ export class GameScene extends Phaser.Scene {
     this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
     this.effects.createSpeedLines();
-    this.debugGraphics = this.debugHitboxesEnabled ? this.add.graphics().setDepth(20) : undefined;
+    this.debugGraphics = this.debugModeEnabled ? this.add.graphics().setDepth(20) : undefined;
     this.publishState();
 
     this.bindActionHandler();
@@ -54,7 +56,7 @@ export class GameScene extends Phaser.Scene {
 
   private resetRuntimeFields(): void {
     this.laneController = new LaneController();
-    this.runState = resetRun(this.runState);
+    this.runState = resetRun(this.runState, { debug: this.debugModeEnabled });
     this.spawner = new ObstacleSpawner(1);
     this.items = [];
     this.elapsedMs = 0;
@@ -181,10 +183,12 @@ export class GameScene extends Phaser.Scene {
 
   private syncPlayerPosition(): void {
     const snapshot = this.laneController.snapshot();
-    const projected = this.projector.projectLane(snapshot.lane, this.player.container.y);
+    const projected = this.projector.projectLane(snapshot.lane, PLAYER_ANCHOR_Y);
+    const pose = playerRunPose(this.elapsedMs, this.runState.hasStarted && !this.runState.isPaused && !this.runState.isGameOver, this.runState.isBoosting);
     const motionScaleY = snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 0.86 : 1;
     this.player.container.x = Phaser.Math.Linear(this.player.container.x, projected.x, 0.35);
-    this.player.container.setScale(projected.scale, projected.scale * motionScaleY);
+    this.player.container.y = projected.y + pose.yOffset;
+    this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale * motionScaleY);
     this.player.container.setDepth(6);
   }
 

@@ -8,6 +8,8 @@ export const BOOST_DURATION_MS = 3000;
 export const BOOST_METER_MAX = 100;
 export const ENERGY_SCORE = 10;
 export const DISTANCE_SCORE_STEP = 1;
+export const DEFAULT_SHIELDS = 1;
+export const DEBUG_MODE_SHIELDS = 10000;
 
 export const LANE_X = [GAME_WIDTH / 2 - LANE_WIDTH, GAME_WIDTH / 2, GAME_WIDTH / 2 + LANE_WIDTH] as const;
 

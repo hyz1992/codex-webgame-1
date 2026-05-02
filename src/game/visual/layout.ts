@@ -1,6 +1,7 @@
 import { GAME_HEIGHT } from '../config';
 
 export const SCENE_ALIGNMENT_Y_OFFSET = -36;
+export const PLAYER_ANCHOR_Y = GAME_HEIGHT - 132;
 
 export const BASE_TRACK_HORIZON_Y = Math.round(GAME_HEIGHT * 0.5);
 export const BASE_CITY_BACKGROUND_Y_OFFSET = -24;
