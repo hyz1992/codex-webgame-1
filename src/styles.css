@@ -282,3 +282,39 @@ body {
     display: none;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .hud-bar {
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .hud-bar span {
+    min-height: 30px;
+    padding: 4px 8px;
+  }
+
+  .boost-bar {
+    left: 62px;
+    right: 62px;
+  }
+
+  .menu-screen h1 {
+    font-size: 32px;
+  }
+
+  .primary-action,
+  .secondary-action {
+    min-width: 136px;
+  }
+}
