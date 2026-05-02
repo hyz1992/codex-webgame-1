@@ -1,24 +1,21 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
+import { GAME_HEIGHT, LANE_X } from '../config';
 import type { GameAction } from '../actions';
 import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
-import type { LaneItem } from '../spawn/patterns';
 import { resolveCollision } from '../collision/CollisionSystem';
+import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
 
 export const RUN_STATE_EVENT = 'run-state-change';
 
-interface MovingItem extends LaneItem {
-  shape: Phaser.GameObjects.Rectangle;
-}
-
 export class GameScene extends Phaser.Scene {
-  private player!: Phaser.GameObjects.Rectangle;
+  private player!: PlayerVisual;
+  private visualFactory!: GameVisualFactory;
   private laneController = new LaneController();
   private runState: RunState = createInitialRunState();
   private spawner = new ObstacleSpawner(1);
-  private items: MovingItem[] = [];
+  private items: MovingVisualItem[] = [];
   private elapsedMs = 0;
   private spawnTimerMs = 0;
 
@@ -28,8 +25,10 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.resetRuntimeFields();
-    this.drawTrack();
-    this.player = this.add.rectangle(LANE_X[1], GAME_HEIGHT - 132, 34, 48, 0xf6c453);
+    this.visualFactory = new GameVisualFactory(this);
+    this.visualFactory.createBackground();
+    this.visualFactory.createTrack();
+    this.player = this.visualFactory.createPlayer();
     this.publishState();
 
     this.events.on('game-action', (action: GameAction) => {
@@ -64,14 +63,6 @@ export class GameScene extends Phaser.Scene {
     this.moveItems(deltaMs);
     this.syncPlayerPosition();
     this.publishState();
-  }
-
-  private drawTrack(): void {
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 290, GAME_HEIGHT, 0x1c2b35);
-
-    for (const laneX of LANE_X) {
-      this.add.rectangle(laneX, GAME_HEIGHT / 2, 2, GAME_HEIGHT, 0x39505f, 0.8);
-    }
   }
 
   private applyAction(action: GameAction): void {
@@ -110,34 +101,28 @@ export class GameScene extends Phaser.Scene {
     const items = [...pattern.hazards, ...pattern.pickups];
 
     for (const item of items) {
-      const color = this.getItemColor(item.kind);
-      const size = this.getItemSize(item.kind);
-      const shape = this.add.rectangle(LANE_X[item.lane], -40, size.width, size.height, color);
-      this.items.push({
-        ...item,
-        shape,
-      });
+      this.items.push(this.visualFactory.createLaneItem(item));
     }
   }
 
   private moveItems(deltaMs: number): void {
-    const playerBounds = this.player.getBounds();
+    const playerBounds = this.player.container.getBounds();
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
 
     for (const item of this.items) {
-      item.shape.y += pixels;
+      item.container.y += pixels;
 
-      if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.shape.getBounds())) {
+      if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
         this.runState = resolveCollision(this.runState, item);
-        item.shape.destroy();
+        item.container.destroy();
       }
     }
 
     this.items = this.items.filter((item) => {
-      const keep = item.shape.active && item.shape.y < GAME_HEIGHT + 80;
-      if (!keep && item.shape.active) {
-        item.shape.destroy();
+      const keep = item.container.active && item.container.y < GAME_HEIGHT + 80;
+      if (!keep && item.container.active) {
+        item.container.destroy();
       }
       return keep;
     });
@@ -145,55 +130,8 @@ export class GameScene extends Phaser.Scene {
 
   private syncPlayerPosition(): void {
     const snapshot = this.laneController.snapshot();
-    this.player.x = Phaser.Math.Linear(this.player.x, LANE_X[snapshot.lane], 0.35);
-
-    if (snapshot.motion === 'jumping') {
-      this.player.scaleY = 0.82;
-      return;
-    }
-
-    if (snapshot.motion === 'sliding') {
-      this.player.scaleY = 0.48;
-      return;
-    }
-
-    this.player.scaleY = 1;
-  }
-
-  private getItemColor(kind: LaneItem['kind']): number {
-    if (kind === 'energy') {
-      return 0x63d2ff;
-    }
-
-    if (kind === 'shield') {
-      return 0x7ee787;
-    }
-
-    if (kind === 'boost') {
-      return 0xb78cff;
-    }
-
-    if (kind === 'hazard') {
-      return 0xef476f;
-    }
-
-    return 0xf4a261;
-  }
-
-  private getItemSize(kind: LaneItem['kind']): { width: number; height: number } {
-    if (kind === 'beam') {
-      return { width: 68, height: 24 };
-    }
-
-    if (kind === 'lowFence') {
-      return { width: 48, height: 20 };
-    }
-
-    if (kind === 'energy') {
-      return { width: 24, height: 24 };
-    }
-
-    return { width: 42, height: 42 };
+    this.player.container.x = Phaser.Math.Linear(this.player.container.x, LANE_X[snapshot.lane], 0.35);
+    this.player.container.setScale(1, snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 0.86 : 1);
   }
 
   private publishState(): void {
