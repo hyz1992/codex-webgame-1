@@ -56,16 +56,17 @@ export class AssetVisualFactory {
       return this.fallback.createLaneItem(item);
     }
 
-    const projected = this.projector.projectLane(item.lane, this.projector.spawnY);
+    const roadProgress = this.projector.spawnProgress;
+    const projected = this.projector.projectLaneAtProgress(item.lane, roadProgress);
     const container = this.scene.add.container(projected.x, projected.y);
-    const hitArea = this.scene.add.rectangle(0, 0, asset.display.width, asset.display.height, 0xffffff, 0);
+    const hitArea = this.scene.add.rectangle(0, -asset.display.height / 2, asset.display.width, asset.display.height, 0xffffff, 0);
     const sprite = this.scene.add.image(0, 0, asset.key);
     sprite.setDisplaySize(asset.display.width, asset.display.height);
-    sprite.setOrigin(asset.origin.x, asset.origin.y);
+    sprite.setOrigin(asset.origin.x, 1);
     container.add([sprite, hitArea]);
     container.setDepth(3);
     container.setScale(projected.scale);
-    return { ...item, container, hitArea };
+    return { ...item, container, hitArea, roadProgress };
   }
 
   private hasTexture(key: string): boolean {

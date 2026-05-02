@@ -72,4 +72,28 @@ describe('PerspectiveProjector', () => {
     expect(left.scale).toBeLessThan(0.55);
     expect(right.scale).toBeLessThan(0.55);
   });
+
+  it('projects moving items from world progress instead of screen position', () => {
+    const projector = new PerspectiveProjector();
+    const spawn = projector.projectLaneAtProgress(0, projector.spawnProgress);
+    const mid = projector.projectLaneAtProgress(0, 0.5);
+    const near = projector.projectLaneAtProgress(0, 0.95);
+
+    expect(spawn.y).toBeGreaterThan(projector.horizonY);
+    expect(spawn.x).toBeLessThan(projector.centerX);
+    expect(mid.x).toBeLessThan(spawn.x);
+    expect(near.x).toBeLessThan(mid.x);
+    expect(near.scale / spawn.scale).toBeGreaterThan(2.8);
+  });
+
+  it('uses the same projection for lane guide points and objects', () => {
+    const projector = new PerspectiveProjector();
+    const laneGuide = projector.trackLanePoints(-1, 8);
+
+    for (const point of laneGuide) {
+      const object = projector.projectLaneAtProgress(0, point.progress);
+      expect(object.x).toBeCloseTo(point.x, 5);
+      expect(object.y).toBeCloseTo(point.y, 5);
+    }
+  });
 });

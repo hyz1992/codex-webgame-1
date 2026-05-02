@@ -145,9 +145,10 @@ export class GameScene extends Phaser.Scene {
     const playerMotion = this.laneController.snapshot().motion;
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
+    const progressDelta = pixels / (this.projector.bottomY - this.projector.horizonY);
 
     for (const item of this.items) {
-      item.container.y += pixels;
+      item.roadProgress += progressDelta;
       this.projectMovingItem(item);
 
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
@@ -170,7 +171,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.items = this.items.filter((item) => {
-      const keep = item.container.active && item.container.y < GAME_HEIGHT + 80;
+      const keep = item.container.active && item.roadProgress < 1.08;
       if (!keep && item.container.active) {
         item.container.destroy();
       }
@@ -188,8 +189,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private projectMovingItem(item: MovingVisualItem): void {
-    const projected = this.projector.projectLane(item.lane, item.container.y);
+    const projected = this.projector.projectLaneAtProgress(item.lane, item.roadProgress);
     item.container.x = projected.x;
+    item.container.y = projected.y;
     item.container.setScale(projected.scale);
     item.container.setAlpha(projected.alpha);
     item.container.setDepth(projected.depth);

@@ -16,6 +16,7 @@ export interface PlayerVisual {
 export interface MovingVisualItem extends LaneItem {
   container: Phaser.GameObjects.Container;
   hitArea: Phaser.GameObjects.Rectangle;
+  roadProgress: number;
 }
 
 export class GameVisualFactory {
@@ -78,19 +79,7 @@ export class GameVisualFactory {
 
     for (const edge of [-1.5, -0.5, 0.5, 1.5] as const) {
       const color = Math.abs(edge) === 1.5 ? neonSunsetTheme.colors.lanePurple : neonSunsetTheme.colors.laneCyan;
-      const line = this.scene.add.line(
-        0,
-        0,
-        this.projector.trackEdgeX(edge, this.projector.horizonY),
-        this.projector.horizonY,
-        this.projector.trackEdgeX(edge, this.projector.bottomY),
-        this.projector.bottomY,
-        color,
-        Math.abs(edge) === 1.5 ? 0.58 : 0.46,
-      );
-      line.setOrigin(0, 0);
-      line.setLineWidth(Math.abs(edge) === 1.5 ? 4 : 2);
-      container.add(line);
+      this.strokeTrackCurve(graphics, edge, color, Math.abs(edge) === 1.5 ? 0.58 : 0.46, Math.abs(edge) === 1.5 ? 4 : 2);
     }
 
     container.setDepth(1);
@@ -138,40 +127,55 @@ export class GameVisualFactory {
     const visual = getLaneItemVisual(item.kind);
     const fill = Number(visual.fill);
     const glow = Number(visual.glow);
-    const spawn = this.projector.projectLane(item.lane, this.projector.spawnY);
+    const roadProgress = this.projector.spawnProgress;
+    const spawn = this.projector.projectLaneAtProgress(item.lane, roadProgress);
     const container = this.scene.add.container(spawn.x, spawn.y);
-    const hitArea = this.scene.add.rectangle(0, 0, 44, 44, fill, 0);
+    const hitArea = this.scene.add.rectangle(0, -22, 44, 44, fill, 0);
 
     if (visual.shape === 'orb') {
-      const orb = this.scene.add.circle(0, 0, 13, fill, 1);
+      const orb = this.scene.add.circle(0, -13, 13, fill, 1);
       orb.setStrokeStyle(2, glow, 0.8);
       container.add(orb);
     } else if (visual.shape === 'hex' || visual.shape === 'crystal') {
-      const gem = this.scene.add.polygon(0, 0, [0, -20, 18, -8, 16, 14, 0, 22, -16, 14, -18, -8], fill, 1);
+      const gem = this.scene.add.polygon(0, -22, [0, -20, 18, -8, 16, 14, 0, 22, -16, 14, -18, -8], fill, 1);
       gem.setStrokeStyle(2, glow, 0.82);
       container.add(gem);
     } else if (visual.shape === 'beam') {
-      const beam = this.scene.add.rectangle(0, 0, 118, 18, fill, 1);
+      const beam = this.scene.add.rectangle(0, -18, 118, 18, fill, 1);
       beam.setStrokeStyle(2, glow, 0.9);
+      hitArea.setY(-18);
       hitArea.setSize(118, 24);
       container.add(beam);
     } else if (visual.shape === 'low-fence') {
-      const fence = this.scene.add.rectangle(0, 8, 54, 22, fill, 1);
+      const fence = this.scene.add.rectangle(0, -11, 54, 22, fill, 1);
       fence.setStrokeStyle(2, glow, 0.84);
+      hitArea.setY(-11);
       hitArea.setSize(54, 26);
       container.add(fence);
     } else if (visual.shape === 'rift') {
-      const rift = this.scene.add.polygon(0, 0, [-16, -24, 16, -14, 4, 0, 18, 24, -18, 14, -5, 0], fill, 1);
+      const rift = this.scene.add.polygon(0, -24, [-16, -24, 16, -14, 4, 0, 18, 24, -18, 14, -5, 0], fill, 1);
       rift.setStrokeStyle(2, glow, 0.95);
       container.add(rift);
     } else {
-      const block = this.scene.add.rectangle(0, 0, 46, 42, fill, 1);
+      const block = this.scene.add.rectangle(0, -21, 46, 42, fill, 1);
       block.setStrokeStyle(2, glow, 0.82);
       container.add(block);
     }
 
     container.add(hitArea);
     container.setDepth(3);
-    return { ...item, container, hitArea };
+    container.setScale(spawn.scale);
+    return { ...item, container, hitArea, roadProgress };
+  }
+
+  private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {
+    const points = this.projector.trackLanePoints(edge, 18);
+    graphics.lineStyle(width, color, alpha);
+    graphics.beginPath();
+    graphics.moveTo(points[0].x, points[0].y);
+    for (const point of points.slice(1)) {
+      graphics.lineTo(point.x, point.y);
+    }
+    graphics.strokePath();
   }
 }
