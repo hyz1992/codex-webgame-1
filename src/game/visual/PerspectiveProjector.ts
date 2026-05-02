@@ -23,6 +23,10 @@ export interface TrackLanePoint {
   y: number;
 }
 
+export interface RoadsideMarkerPoint extends TrackLanePoint {
+  scale: number;
+}
+
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
   readonly horizonY = TRACK_HORIZON_Y;
@@ -34,6 +38,7 @@ export class PerspectiveProjector {
   readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
   readonly laneWorldSpacing = (LANE_WORLD_SPACING_AT_NEAR * this.nearDistance) / this.focalLength;
   readonly nearScale = PROJECTED_NEAR_SCALE;
+  readonly exitProgress = 1.18;
   readonly spawnProgress = 0.075;
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
@@ -42,7 +47,7 @@ export class PerspectiveProjector {
   }
 
   projectLaneAtProgress(lane: number, progress: number): ProjectedLanePoint {
-    const perspective = this.clamp01(progress);
+    const perspective = Math.max(0, Math.min(this.exitProgress, progress));
     const distance = perspective === 0 ? Number.POSITIVE_INFINITY : this.nearDistance / perspective;
     const projectedGroundY = distance === Number.POSITIVE_INFINITY ? 0 : (this.cameraHeight * this.focalLength) / distance;
     const laneSpacing = distance === Number.POSITIVE_INFINITY ? 0 : (this.laneWorldSpacing * this.focalLength) / distance;
@@ -60,7 +65,7 @@ export class PerspectiveProjector {
 
   movementRateAtProgress(progress: number): number {
     const t = this.smoothstep(0.22, 0.78, this.clamp01(progress));
-    return this.lerp(1.08, 0.84, t);
+    return this.lerp(1.03, 0.95, t);
   }
 
   trackPolygon(): TrackPolygon {
@@ -91,6 +96,24 @@ export class PerspectiveProjector {
         progress,
         x: this.centerX + edge * projected.laneSpacing,
         y: projected.y,
+      });
+    }
+
+    return points;
+  }
+
+  roadsideMarkerPoints(side: -1 | 1, count: number): RoadsideMarkerPoint[] {
+    const points: RoadsideMarkerPoint[] = [];
+    const total = Math.max(1, count);
+
+    for (let index = 0; index < total; index += 1) {
+      const progress = 0.16 + (index / total) * 0.78;
+      const projected = this.projectLaneAtProgress(1, progress);
+      points.push({
+        progress,
+        x: this.centerX + side * projected.laneSpacing * 1.72,
+        y: projected.y,
+        scale: projected.scale,
       });
     }
 

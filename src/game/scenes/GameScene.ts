@@ -183,7 +183,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.items = this.items.filter((item) => {
-      const keep = item.container.active && item.roadProgress < 1.08;
+      const keep = item.container.active && item.roadProgress < this.projector.exitProgress;
       if (!keep && item.container.active) {
         item.container.destroy();
       }

@@ -131,8 +131,31 @@ describe('PerspectiveProjector', () => {
 
     expect(earlyRate).toBeGreaterThan(midRate);
     expect(midRate).toBeGreaterThan(lateRate);
-    expect(earlyRate).toBeLessThanOrEqual(1.12);
-    expect(lateRate).toBeGreaterThanOrEqual(0.78);
-    expect(lateRate).toBeGreaterThan(earlyRate * 0.72);
+    expect(earlyRate).toBeLessThanOrEqual(1.04);
+    expect(lateRate).toBeGreaterThanOrEqual(0.93);
+    expect(lateRate).toBeGreaterThan(earlyRate * 0.9);
+  });
+
+  it('continues projecting objects below the near edge so they leave the screen smoothly', () => {
+    const projector = new PerspectiveProjector();
+    const nearEdge = projector.projectLaneAtProgress(1, 1);
+    const offscreen = projector.projectLaneAtProgress(1, 1.12);
+
+    expect(offscreen.y).toBeGreaterThan(nearEdge.y);
+    expect(offscreen.y).toBeGreaterThan(projector.bottomY);
+    expect(offscreen.scale).toBeGreaterThan(nearEdge.scale);
+  });
+
+  it('provides evenly spaced roadside marker points on both sides of the track', () => {
+    const projector = new PerspectiveProjector();
+    const left = projector.roadsideMarkerPoints(-1, 6);
+    const right = projector.roadsideMarkerPoints(1, 6);
+
+    expect(left).toHaveLength(6);
+    expect(right).toHaveLength(6);
+    expect(left[0].progress).toBeLessThan(left[1].progress);
+    expect(left[0].x).toBeLessThan(projector.centerX);
+    expect(right[0].x).toBeGreaterThan(projector.centerX);
+    expect(right[0].y).toBe(left[0].y);
   });
 });

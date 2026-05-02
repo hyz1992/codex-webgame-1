@@ -118,6 +118,7 @@ export class GameVisualFactory {
       this.strokeTrackCurve(graphics, edge, color, Math.abs(edge) === 1.5 ? 0.58 : 0.46, Math.abs(edge) === 1.5 ? 4 : 2);
     }
 
+    this.addRoadsideLamps(container);
     container.add(this.createHorizonMist());
 
     container.setDepth(1);
@@ -253,5 +254,22 @@ export class GameVisualFactory {
     mist.fillStyle(TRACK_HORIZON_MIST.color, TRACK_HORIZON_MIST.coreAlpha);
     mist.fillRect(0, y - TRACK_HORIZON_MIST.height / 3, GAME_WIDTH, TRACK_HORIZON_MIST.height * 0.56);
     return mist;
+  }
+
+  private addRoadsideLamps(container: Phaser.GameObjects.Container): void {
+    for (const side of [-1, 1] as const) {
+      for (const point of this.projector.roadsideMarkerPoints(side, 7)) {
+        const lamp = this.scene.add.container(point.x, point.y);
+        const height = Math.max(18, 42 * point.scale);
+        const pole = this.scene.add.rectangle(0, -height / 2, Math.max(1.5, 3 * point.scale), height, 0x18f7ff, 0.24);
+        const bulb = this.scene.add.circle(0, -height, Math.max(2.2, 5 * point.scale), 0xf6ff5d, 0.78);
+        const halo = this.scene.add.circle(0, -height, Math.max(5, 13 * point.scale), 0x18f7ff, 0.13);
+        const foot = this.scene.add.ellipse(0, 0, Math.max(8, 20 * point.scale), Math.max(2, 6 * point.scale), 0x020817, 0.2);
+        lamp.add([foot, pole, halo, bulb]);
+        lamp.setDepth(2 + point.progress);
+        lamp.setAlpha(trackFarFadeAlpha(point.progress, 0.85));
+        container.add(lamp);
+      }
+    }
   }
 }
