@@ -146,16 +146,26 @@ describe('PerspectiveProjector', () => {
     expect(offscreen.scale).toBeGreaterThan(nearEdge.scale);
   });
 
-  it('provides evenly spaced roadside marker points on both sides of the track', () => {
+  it('places roadside marker points visually denser in the distance and sparser nearby', () => {
     const projector = new PerspectiveProjector();
     const left = projector.roadsideMarkerPoints(-1, 6);
     const right = projector.roadsideMarkerPoints(1, 6);
+    const farGap = left[1].y - left[0].y;
+    const nearGap = left[5].y - left[4].y;
 
     expect(left).toHaveLength(6);
     expect(right).toHaveLength(6);
     expect(left[0].progress).toBeLessThan(left[1].progress);
+    expect(farGap).toBeLessThan(nearGap);
     expect(left[0].x).toBeLessThan(projector.centerX);
     expect(right[0].x).toBeGreaterThan(projector.centerX);
     expect(right[0].y).toBe(left[0].y);
+  });
+
+  it('loops roadside markers from the near exit back to the far end', () => {
+    const projector = new PerspectiveProjector();
+
+    expect(projector.loopRoadsideProgress(projector.exitProgress + 0.02)).toBeCloseTo(projector.spawnProgress, 5);
+    expect(projector.loopRoadsideProgress(0.42)).toBe(0.42);
   });
 });

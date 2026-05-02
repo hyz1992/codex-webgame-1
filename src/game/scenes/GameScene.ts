@@ -8,7 +8,7 @@ import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
 import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
-import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
+import { GameVisualFactory, type MovingVisualItem, type PlayerVisual, type RoadsideLampVisual } from '../visual/GameVisualFactory';
 import { ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
 import { playerRunPose } from '../visual/playerRunPose';
@@ -29,6 +29,7 @@ export class GameScene extends Phaser.Scene {
   private runState: RunState = createInitialRunState();
   private spawner = new ObstacleSpawner(1);
   private items: MovingVisualItem[] = [];
+  private roadsideLamps: RoadsideLampVisual[] = [];
   private elapsedMs = 0;
   private spawnTimerMs = 0;
   private motionStartedMs = 0;
@@ -47,6 +48,7 @@ export class GameScene extends Phaser.Scene {
     this.assetVisualFactory = new AssetVisualFactory(this, this.visualFactory);
     this.assetVisualFactory.createBackground();
     this.assetVisualFactory.createTrack();
+    this.roadsideLamps = this.createRoadsideLamps();
     this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
     this.effects.createSpeedLines();
@@ -61,6 +63,7 @@ export class GameScene extends Phaser.Scene {
     this.runState = resetRun(this.runState, { debug: this.debugModeEnabled });
     this.spawner = new ObstacleSpawner(1);
     this.items = [];
+    this.roadsideLamps = [];
     this.elapsedMs = 0;
     this.spawnTimerMs = 0;
     this.motionStartedMs = 0;
@@ -92,6 +95,7 @@ export class GameScene extends Phaser.Scene {
 
     this.syncPlayerPosition();
     this.moveItems(deltaMs);
+    this.moveRoadsideLamps(deltaMs);
     this.effects.updateBoost(this.runState.isBoosting);
     this.drawDebugHitboxes();
     this.publishState();
@@ -191,6 +195,33 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  private createRoadsideLamps(): RoadsideLampVisual[] {
+    const lamps: RoadsideLampVisual[] = [];
+
+    for (const side of [-1, 1] as const) {
+      for (const point of this.projector.roadsideMarkerPoints(side, 8)) {
+        const lamp = this.visualFactory.createRoadsideLamp(side, point.progress);
+        this.projectRoadsideLamp(lamp);
+        lamps.push(lamp);
+      }
+    }
+
+    return lamps;
+  }
+
+  private moveRoadsideLamps(deltaMs: number): void {
+    const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
+    const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
+
+    for (const lamp of this.roadsideLamps) {
+      const progressDelta =
+        (pixels / (this.projector.bottomY - this.projector.horizonY)) *
+        this.projector.movementRateAtProgress(lamp.roadProgress);
+      lamp.roadProgress = this.projector.loopRoadsideProgress(lamp.roadProgress + progressDelta);
+      this.projectRoadsideLamp(lamp);
+    }
+  }
+
   private syncPlayerPosition(): void {
     const snapshot = this.laneController.snapshot();
     const projected = this.projector.projectLane(snapshot.lane, PLAYER_ANCHOR_Y);
@@ -215,6 +246,15 @@ export class GameScene extends Phaser.Scene {
     item.container.setScale(projected.scale * ITEM_VISUAL_SCALE);
     item.container.setAlpha(projected.alpha);
     item.container.setDepth(projected.depth);
+  }
+
+  private projectRoadsideLamp(lamp: RoadsideLampVisual): void {
+    const projected = this.projector.projectLaneAtProgress(1, lamp.roadProgress);
+    lamp.container.x = this.projector.centerX + lamp.side * projected.laneSpacing * 1.72;
+    lamp.container.y = projected.y;
+    lamp.container.setScale(projected.scale);
+    lamp.container.setAlpha(projected.alpha * 0.85);
+    lamp.container.setDepth(2 + lamp.roadProgress * 4);
   }
 
   private drawDebugHitboxes(): void {

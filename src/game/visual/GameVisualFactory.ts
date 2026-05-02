@@ -21,6 +21,12 @@ export interface MovingVisualItem extends LaneItem {
   roadProgress: number;
 }
 
+export interface RoadsideLampVisual {
+  container: Phaser.GameObjects.Container;
+  side: -1 | 1;
+  roadProgress: number;
+}
+
 export const TRACK_FAR_FADE_PROGRESS = 0.18;
 
 export const TRACK_HORIZON_MIST = {
@@ -118,7 +124,6 @@ export class GameVisualFactory {
       this.strokeTrackCurve(graphics, edge, color, Math.abs(edge) === 1.5 ? 0.58 : 0.46, Math.abs(edge) === 1.5 ? 4 : 2);
     }
 
-    this.addRoadsideLamps(container);
     container.add(this.createHorizonMist());
 
     container.setDepth(1);
@@ -226,6 +231,23 @@ export class GameVisualFactory {
     return { ...item, container, hitArea, roadProgress };
   }
 
+  createRoadsideLamp(side: -1 | 1, roadProgress: number): RoadsideLampVisual {
+    const projected = this.projector.projectLaneAtProgress(1, roadProgress);
+    const lamp = this.scene.add.container(this.projector.centerX + side * projected.laneSpacing * 1.72, projected.y);
+    const foot = this.scene.add.ellipse(0, 0, 20, 6, 0x020817, 0.22);
+    const pole = this.scene.add.rectangle(0, -22, 3, 44, 0x18f7ff, 0.24);
+    const halo = this.scene.add.circle(0, -44, 13, 0x18f7ff, 0.13);
+    const bulb = this.scene.add.circle(0, -44, 5, 0xf6ff5d, 0.78);
+
+    pole.setStrokeStyle(1, 0x7fffff, 0.35);
+    bulb.setStrokeStyle(1, 0xffffff, 0.55);
+    lamp.add([foot, pole, halo, bulb]);
+    lamp.setDepth(2 + roadProgress);
+    lamp.setScale(projected.scale);
+    lamp.setAlpha(trackFarFadeAlpha(roadProgress, 0.85));
+    return { container: lamp, side, roadProgress };
+  }
+
   private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {
     const points = this.projector.trackLanePoints(edge, 18);
     for (let index = 1; index < points.length; index += 1) {
@@ -256,20 +278,4 @@ export class GameVisualFactory {
     return mist;
   }
 
-  private addRoadsideLamps(container: Phaser.GameObjects.Container): void {
-    for (const side of [-1, 1] as const) {
-      for (const point of this.projector.roadsideMarkerPoints(side, 7)) {
-        const lamp = this.scene.add.container(point.x, point.y);
-        const height = Math.max(18, 42 * point.scale);
-        const pole = this.scene.add.rectangle(0, -height / 2, Math.max(1.5, 3 * point.scale), height, 0x18f7ff, 0.24);
-        const bulb = this.scene.add.circle(0, -height, Math.max(2.2, 5 * point.scale), 0xf6ff5d, 0.78);
-        const halo = this.scene.add.circle(0, -height, Math.max(5, 13 * point.scale), 0x18f7ff, 0.13);
-        const foot = this.scene.add.ellipse(0, 0, Math.max(8, 20 * point.scale), Math.max(2, 6 * point.scale), 0x020817, 0.2);
-        lamp.add([foot, pole, halo, bulb]);
-        lamp.setDepth(2 + point.progress);
-        lamp.setAlpha(trackFarFadeAlpha(point.progress, 0.85));
-        container.add(lamp);
-      }
-    }
-  }
 }

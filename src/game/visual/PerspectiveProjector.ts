@@ -105,9 +105,12 @@ export class PerspectiveProjector {
   roadsideMarkerPoints(side: -1 | 1, count: number): RoadsideMarkerPoint[] {
     const points: RoadsideMarkerPoint[] = [];
     const total = Math.max(1, count);
+    const steps = Math.max(1, total - 1);
+    const visibleNearProgress = 0.98;
 
     for (let index = 0; index < total; index += 1) {
-      const progress = 0.16 + (index / total) * 0.78;
+      const t = index / steps;
+      const progress = this.lerp(this.spawnProgress, visibleNearProgress, t * t);
       const projected = this.projectLaneAtProgress(1, progress);
       points.push({
         progress,
@@ -118,6 +121,10 @@ export class PerspectiveProjector {
     }
 
     return points;
+  }
+
+  loopRoadsideProgress(progress: number): number {
+    return progress >= this.exitProgress ? this.spawnProgress : progress;
   }
 
   normalizedDepth(y: number): number {
