@@ -59,7 +59,12 @@ body {
   inset: 0;
 }
 
+#game-root {
+  z-index: 0;
+}
+
 #hud-root {
+  z-index: 10;
   pointer-events: none;
 }
 

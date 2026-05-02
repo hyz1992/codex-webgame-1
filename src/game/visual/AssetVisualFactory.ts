@@ -3,9 +3,8 @@ import { gameAssetManifest, getLaneItemAsset } from '../assets/assetManifest';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
+import { CITY_BACKGROUND_Y_OFFSET, SUNSET_BACKGROUND_Y_OFFSET } from './layout';
 import { PerspectiveProjector } from './PerspectiveProjector';
-
-export const CITY_BACKGROUND_Y_OFFSET = -24;
 
 export class AssetVisualFactory {
   private readonly projector = new PerspectiveProjector();
@@ -21,8 +20,8 @@ export class AssetVisualFactory {
     }
 
     const container = this.scene.add.container(0, 0);
-    const sky = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'bg-sunset-sky');
-    sky.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
+    const sky = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + SUNSET_BACKGROUND_Y_OFFSET, 'bg-sunset-sky');
+    sky.setDisplaySize(GAME_WIDTH, GAME_HEIGHT + Math.abs(SUNSET_BACKGROUND_Y_OFFSET) * 2);
     const skyline = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + CITY_BACKGROUND_Y_OFFSET, 'bg-city-silhouette');
     skyline.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
     container.add([sky, skyline]);

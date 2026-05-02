@@ -1,4 +1,5 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { TRACK_HORIZON_Y } from './layout';
 
 export interface ProjectedLanePoint {
   x: number;
@@ -24,7 +25,7 @@ export interface TrackLanePoint {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = Math.round(GAME_HEIGHT * 0.5);
+  readonly horizonY = TRACK_HORIZON_Y;
   readonly bottomY = GAME_HEIGHT + 28;
   readonly viewportHalfHeight = GAME_HEIGHT / 2;
   readonly verticalFovRadians = (56 * Math.PI) / 180;

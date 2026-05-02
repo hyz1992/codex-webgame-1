@@ -108,7 +108,7 @@ export function keyToAction(key: string): GameAction | null {
     return 'slide';
   }
 
-  if (key === 'Escape') {
+  if (key === 'Escape' || key === ' ' || key === 'Space' || key === 'Spacebar') {
     return 'pause';
   }
 
@@ -116,7 +116,7 @@ export function keyToAction(key: string): GameAction | null {
     return 'restart';
   }
 
-  if (key === 'Enter' || key === ' ') {
+  if (key === 'Enter') {
     return 'confirm';
   }
 
