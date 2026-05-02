@@ -9,6 +9,7 @@ import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
 
 export const RUN_STATE_EVENT = 'run-state-change';
+const GAME_ACTION_EVENT = 'game-action';
 
 export class GameScene extends Phaser.Scene {
   private player!: PlayerVisual;
@@ -35,9 +36,7 @@ export class GameScene extends Phaser.Scene {
     this.effects.createSpeedLines();
     this.publishState();
 
-    this.events.on('game-action', (action: GameAction) => {
-      this.applyAction(action);
-    });
+    this.bindActionHandler();
   }
 
   private resetRuntimeFields(): void {
@@ -47,6 +46,15 @@ export class GameScene extends Phaser.Scene {
     this.items = [];
     this.elapsedMs = 0;
     this.spawnTimerMs = 0;
+  }
+
+  private readonly handleGameAction = (action: GameAction): void => {
+    this.applyAction(action);
+  };
+
+  private bindActionHandler(): void {
+    this.events.off(GAME_ACTION_EVENT, this.handleGameAction);
+    this.events.on(GAME_ACTION_EVENT, this.handleGameAction);
   }
 
   update(_time: number, deltaMs: number): void {
