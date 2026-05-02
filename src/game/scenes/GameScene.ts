@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
 import type { GameAction } from '../actions';
 import { LaneController } from '../lane/LaneController';
-import { addDistance, createInitialRunState, startRun, tickBoost, type RunState } from '../state';
+import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
 import type { LaneItem } from '../spawn/patterns';
 import { resolveCollision } from '../collision/CollisionSystem';
@@ -27,6 +27,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.resetRuntimeFields();
     this.drawTrack();
     this.player = this.add.rectangle(LANE_X[1], GAME_HEIGHT - 132, 34, 48, 0xf6c453);
     this.publishState();
@@ -34,6 +35,15 @@ export class GameScene extends Phaser.Scene {
     this.events.on('game-action', (action: GameAction) => {
       this.applyAction(action);
     });
+  }
+
+  private resetRuntimeFields(): void {
+    this.laneController = new LaneController();
+    this.runState = resetRun(this.runState);
+    this.spawner = new ObstacleSpawner(1);
+    this.items = [];
+    this.elapsedMs = 0;
+    this.spawnTimerMs = 0;
   }
 
   update(_time: number, deltaMs: number): void {

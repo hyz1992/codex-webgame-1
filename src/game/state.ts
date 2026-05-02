@@ -49,6 +49,10 @@ export function startRun(state: RunState): RunState {
   };
 }
 
+export function resetRun(_state: RunState): RunState {
+  return createInitialRunState();
+}
+
 export function addDistance(state: RunState, distanceDelta: number): RunState {
   if (!state.hasStarted || state.isPaused || state.isGameOver) {
     return state;
