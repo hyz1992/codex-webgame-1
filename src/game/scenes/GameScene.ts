@@ -5,6 +5,7 @@ import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
 import { resolveCollision } from '../collision/CollisionSystem';
+import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
 
 export const RUN_STATE_EVENT = 'run-state-change';
@@ -12,6 +13,7 @@ export const RUN_STATE_EVENT = 'run-state-change';
 export class GameScene extends Phaser.Scene {
   private player!: PlayerVisual;
   private visualFactory!: GameVisualFactory;
+  private effects!: EffectController;
   private laneController = new LaneController();
   private runState: RunState = createInitialRunState();
   private spawner = new ObstacleSpawner(1);
@@ -29,6 +31,8 @@ export class GameScene extends Phaser.Scene {
     this.visualFactory.createBackground();
     this.visualFactory.createTrack();
     this.player = this.visualFactory.createPlayer();
+    this.effects = new EffectController(this);
+    this.effects.createSpeedLines();
     this.publishState();
 
     this.events.on('game-action', (action: GameAction) => {
@@ -61,6 +65,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.moveItems(deltaMs);
+    this.effects.updateBoost(this.runState.isBoosting);
     this.syncPlayerPosition();
     this.publishState();
   }
@@ -90,7 +95,13 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    const beforeLane = this.laneController.snapshot().lane;
     this.laneController.applyAction(action);
+    const afterLane = this.laneController.snapshot().lane;
+    if (afterLane !== beforeLane) {
+      this.effects.playLaneChange(this.player, afterLane);
+    }
+
     this.time.delayedCall(280, () => {
       this.laneController.endActionState();
     });
@@ -114,7 +125,19 @@ export class GameScene extends Phaser.Scene {
       item.container.y += pixels;
 
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
+        const beforeGameOver = this.runState.isGameOver;
         this.runState = resolveCollision(this.runState, item);
+        if (item.kind === 'energy' || item.kind === 'shield' || item.kind === 'boost') {
+          this.effects.playPickup(item, item.container.x, item.container.y);
+        }
+        if (item.kind === 'shield') {
+          this.effects.playShield(this.player);
+        }
+        if (this.runState.isGameOver && !beforeGameOver) {
+          this.effects.playGameOver(this.player.container.x, this.player.container.y);
+        } else if (item.kind !== 'energy' && item.kind !== 'shield' && item.kind !== 'boost') {
+          this.effects.playImpact(this.player);
+        }
         item.container.destroy();
       }
     }
