@@ -30,20 +30,6 @@ export class AssetVisualFactory {
 
   createTrack(): Phaser.GameObjects.Container {
     const track = this.fallback.createTrack();
-    if (!this.hasTexture('track-edge-glow') || !this.hasTexture('track-speed-grid')) {
-      return track;
-    }
-
-    const grid = this.scene.add.tileSprite(GAME_WIDTH / 2, GAME_HEIGHT / 2, 290, GAME_HEIGHT, 'track-speed-grid');
-    const leftGlow = this.scene.add.image(this.projector.trackEdgeX(-1.5, GAME_HEIGHT - 80), GAME_HEIGHT / 2, 'track-edge-glow');
-    const rightGlow = this.scene.add.image(this.projector.trackEdgeX(1.5, GAME_HEIGHT - 80), GAME_HEIGHT / 2, 'track-edge-glow');
-    grid.setAlpha(0.22);
-    leftGlow.setDisplaySize(64, GAME_HEIGHT);
-    leftGlow.setAlpha(0.22);
-    rightGlow.setDisplaySize(64, GAME_HEIGHT);
-    rightGlow.setFlipX(true);
-    rightGlow.setAlpha(0.22);
-    track.add([grid, leftGlow, rightGlow]);
     return track;
   }
 

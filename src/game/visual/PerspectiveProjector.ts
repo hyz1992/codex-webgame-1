@@ -18,27 +18,26 @@ export interface TrackPolygon {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = 104;
-  readonly spawnY = 118;
-  readonly bottomY = GAME_HEIGHT + 104;
-  readonly farLaneSpacing = 12;
-  readonly nearLaneSpacing = 116;
-  readonly farScale = 0.26;
+  readonly horizonY = 72;
+  readonly spawnY = 156;
+  readonly bottomY = GAME_HEIGHT + 132;
+  readonly farLaneSpacing = 0;
+  readonly nearLaneSpacing = 128;
+  readonly farScale = 0.18;
   readonly nearScale = 1.14;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {
-    const t = this.normalizedDepth(y);
-    const eased = t * t * (3 - 2 * t);
-    const laneSpacing = this.lerp(this.farLaneSpacing, this.nearLaneSpacing, eased);
-    const scale = this.lerp(this.farScale, this.nearScale, eased);
+    const perspective = this.perspectiveAmount(y);
+    const laneSpacing = this.lerp(this.farLaneSpacing, this.nearLaneSpacing, perspective);
+    const scale = this.lerp(this.farScale, this.nearScale, perspective);
 
     return {
       x: this.centerX + (lane - 1) * laneSpacing,
       y,
       laneSpacing,
       scale,
-      depth: 2 + t * 5,
-      alpha: this.lerp(0.42, 1, t),
+      depth: 2 + perspective * 6,
+      alpha: this.lerp(0.38, 1, perspective),
     };
   }
 
@@ -47,10 +46,10 @@ export class PerspectiveProjector {
     const bottom = this.projectLane(1, this.bottomY);
 
     return {
-      topLeft: { x: this.centerX - top.laneSpacing * 0.9, y: this.horizonY },
-      topRight: { x: this.centerX + top.laneSpacing * 0.9, y: this.horizonY },
-      bottomRight: { x: this.centerX + bottom.laneSpacing * 1.95, y: this.bottomY },
-      bottomLeft: { x: this.centerX - bottom.laneSpacing * 1.95, y: this.bottomY },
+      topLeft: { x: this.centerX - top.laneSpacing, y: this.horizonY },
+      topRight: { x: this.centerX + top.laneSpacing, y: this.horizonY },
+      bottomRight: { x: this.centerX + bottom.laneSpacing * 2.05, y: this.bottomY },
+      bottomLeft: { x: this.centerX - bottom.laneSpacing * 2.05, y: this.bottomY },
     };
   }
 
@@ -61,6 +60,10 @@ export class PerspectiveProjector {
 
   normalizedDepth(y: number): number {
     return Math.max(0, Math.min(1, (y - this.horizonY) / (this.bottomY - this.horizonY)));
+  }
+
+  perspectiveAmount(y: number): number {
+    return Math.pow(this.normalizedDepth(y), 0.55);
   }
 
   private lerp(from: number, to: number, t: number): number {

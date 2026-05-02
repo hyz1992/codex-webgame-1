@@ -50,4 +50,26 @@ describe('PerspectiveProjector', () => {
     expect(spawn.y).toBe(projector.spawnY);
     expect(spawn.scale).toBeLessThan(0.45);
   });
+
+  it('track edges collapse exactly into the vanishing point at the horizon', () => {
+    const projector = new PerspectiveProjector();
+    const polygon = projector.trackPolygon();
+
+    expect(polygon.topLeft.x).toBe(projector.centerX);
+    expect(polygon.topRight.x).toBe(projector.centerX);
+    expect(projector.trackEdgeX(-1.5, projector.horizonY)).toBe(projector.centerX);
+    expect(projector.trackEdgeX(1.5, projector.horizonY)).toBe(projector.centerX);
+  });
+
+  it('side lane objects spawn visibly on their own perspective lanes', () => {
+    const projector = new PerspectiveProjector();
+    const left = projector.projectLane(0, projector.spawnY);
+    const center = projector.projectLane(1, projector.spawnY);
+    const right = projector.projectLane(2, projector.spawnY);
+
+    expect(center.x - left.x).toBeGreaterThan(24);
+    expect(right.x - center.x).toBeGreaterThan(24);
+    expect(left.scale).toBeLessThan(0.55);
+    expect(right.scale).toBeLessThan(0.55);
+  });
 });
