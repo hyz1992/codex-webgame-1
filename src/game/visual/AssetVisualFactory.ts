@@ -5,6 +5,8 @@ import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
 import { PerspectiveProjector } from './PerspectiveProjector';
 
+export const CITY_BACKGROUND_Y_OFFSET = -36;
+
 export class AssetVisualFactory {
   private readonly projector = new PerspectiveProjector();
 
@@ -21,7 +23,7 @@ export class AssetVisualFactory {
     const container = this.scene.add.container(0, 0);
     const sky = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'bg-sunset-sky');
     sky.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-    const skyline = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'bg-city-silhouette');
+    const skyline = this.scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + CITY_BACKGROUND_Y_OFFSET, 'bg-city-silhouette');
     skyline.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
     container.add([sky, skyline]);
     container.setDepth(0);
