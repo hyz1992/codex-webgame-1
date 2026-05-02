@@ -29,6 +29,10 @@ export const neonSunsetTheme = {
     height: 52,
     radius: 12,
     trailLength: 54,
+    hitbox: {
+      width: 24,
+      height: 42,
+    },
   },
   motion: {
     laneTweenMs: 140,

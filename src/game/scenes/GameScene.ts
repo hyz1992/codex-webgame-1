@@ -5,7 +5,7 @@ import { preloadGameAssets } from '../assets/preloadGameAssets';
 import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
-import { resolveCollision } from '../collision/CollisionSystem';
+import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
@@ -133,7 +133,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private moveItems(deltaMs: number): void {
-    const playerBounds = this.player.container.getBounds();
+    const playerBounds = this.player.hitArea.getBounds();
+    const playerMotion = this.laneController.snapshot().motion;
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
 
@@ -142,7 +143,8 @@ export class GameScene extends Phaser.Scene {
 
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
         const beforeGameOver = this.runState.isGameOver;
-        this.runState = resolveCollision(this.runState, item);
+        const beforeState = this.runState;
+        this.runState = resolvePlayerCollision(this.runState, item, playerMotion);
         if (item.kind === 'energy' || item.kind === 'shield' || item.kind === 'boost') {
           this.effects.playPickup(item, item.container.x, item.container.y);
         }
@@ -151,7 +153,7 @@ export class GameScene extends Phaser.Scene {
         }
         if (this.runState.isGameOver && !beforeGameOver) {
           this.effects.playGameOver(this.player.container.x, this.player.container.y);
-        } else if (item.kind !== 'energy' && item.kind !== 'shield' && item.kind !== 'boost') {
+        } else if (this.runState !== beforeState && item.kind !== 'energy' && item.kind !== 'shield' && item.kind !== 'boost') {
           this.effects.playImpact(this.player);
         }
         item.container.destroy();

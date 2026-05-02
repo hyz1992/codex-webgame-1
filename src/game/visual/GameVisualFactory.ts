@@ -9,6 +9,7 @@ export interface PlayerVisual {
   core: Phaser.GameObjects.Ellipse;
   trail: Phaser.GameObjects.Rectangle;
   shieldRing: Phaser.GameObjects.Arc;
+  hitArea: Phaser.GameObjects.Rectangle;
 }
 
 export interface MovingVisualItem extends LaneItem {
@@ -112,14 +113,22 @@ export class GameVisualFactory {
     );
     const core = this.scene.add.ellipse(0, -6, 14, 18, neonSunsetTheme.colors.playerCore, 1);
     const shieldRing = this.scene.add.circle(0, 0, 34, neonSunsetTheme.colors.playerBody, 0);
+    const hitArea = this.scene.add.rectangle(
+      0,
+      0,
+      neonSunsetTheme.player.hitbox.width,
+      neonSunsetTheme.player.hitbox.height,
+      0xffffff,
+      0,
+    );
 
     body.setStrokeStyle(2, neonSunsetTheme.colors.playerCore, 0.75);
     trail.setOrigin(0.5, 0);
     shieldRing.setStrokeStyle(2, 0x7ee787, 0);
 
-    const container = this.scene.add.container(LANE_X[1], GAME_HEIGHT - 132, [trail, body, core, shieldRing]);
+    const container = this.scene.add.container(LANE_X[1], GAME_HEIGHT - 132, [trail, body, core, shieldRing, hitArea]);
     container.setDepth(4);
-    return { container, body, core, trail, shieldRing };
+    return { container, body, core, trail, shieldRing, hitArea };
   }
 
   createLaneItem(item: LaneItem): MovingVisualItem {

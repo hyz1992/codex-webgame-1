@@ -50,6 +50,7 @@ export class AssetVisualFactory {
     const fallbackPlayer = this.fallback.createPlayer();
     fallbackPlayer.body.setVisible(false);
     fallbackPlayer.core.setVisible(false);
+    fallbackPlayer.trail.setVisible(false);
     const sprite = this.scene.add.image(0, 0, gameAssetManifest.player.key);
     sprite.setDisplaySize(gameAssetManifest.player.display.width, gameAssetManifest.player.display.height);
     sprite.setOrigin(gameAssetManifest.player.origin.x, gameAssetManifest.player.origin.y);
