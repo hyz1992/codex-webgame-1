@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, LANE_X } from '../config';
 import type { GameAction } from '../actions';
+import { preloadGameAssets } from '../assets/preloadGameAssets';
 import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
 import { resolveCollision } from '../collision/CollisionSystem';
+import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
 
@@ -14,6 +16,7 @@ const GAME_ACTION_EVENT = 'game-action';
 export class GameScene extends Phaser.Scene {
   private player!: PlayerVisual;
   private visualFactory!: GameVisualFactory;
+  private assetVisualFactory!: AssetVisualFactory;
   private effects!: EffectController;
   private laneController = new LaneController();
   private runState: RunState = createInitialRunState();
@@ -26,12 +29,17 @@ export class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
+  preload(): void {
+    preloadGameAssets(this);
+  }
+
   create(): void {
     this.resetRuntimeFields();
     this.visualFactory = new GameVisualFactory(this);
-    this.visualFactory.createBackground();
-    this.visualFactory.createTrack();
-    this.player = this.visualFactory.createPlayer();
+    this.assetVisualFactory = new AssetVisualFactory(this, this.visualFactory);
+    this.assetVisualFactory.createBackground();
+    this.assetVisualFactory.createTrack();
+    this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
     this.effects.createSpeedLines();
     this.publishState();
@@ -120,7 +128,7 @@ export class GameScene extends Phaser.Scene {
     const items = [...pattern.hazards, ...pattern.pickups];
 
     for (const item of items) {
-      this.items.push(this.visualFactory.createLaneItem(item));
+      this.items.push(this.assetVisualFactory.createLaneItem(item));
     }
   }
 
