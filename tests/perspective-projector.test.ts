@@ -61,14 +61,19 @@ describe('PerspectiveProjector', () => {
     expect(projector.trackEdgeX(1.5, projector.horizonY)).toBe(projector.centerX);
   });
 
-  it('side lane objects spawn visibly on their own perspective lanes', () => {
+  it('side lane objects spawn near the track end and then diverge along fixed lanes', () => {
     const projector = new PerspectiveProjector();
     const left = projector.projectLane(0, projector.spawnY);
     const center = projector.projectLane(1, projector.spawnY);
     const right = projector.projectLane(2, projector.spawnY);
+    const nearLeft = projector.projectLaneAtProgress(0, 0.6);
+    const nearCenter = projector.projectLaneAtProgress(1, 0.6);
 
-    expect(center.x - left.x).toBeGreaterThan(24);
-    expect(right.x - center.x).toBeGreaterThan(24);
+    expect(projector.spawnProgress).toBeLessThanOrEqual(0.08);
+    expect(projector.spawnY).toBeLessThanOrEqual(projector.horizonY + 80);
+    expect(center.x - left.x).toBeLessThan(16);
+    expect(right.x - center.x).toBeLessThan(16);
+    expect(nearCenter.x - nearLeft.x).toBeGreaterThan(center.x - left.x);
     expect(left.scale).toBeLessThan(0.55);
     expect(right.scale).toBeLessThan(0.55);
   });

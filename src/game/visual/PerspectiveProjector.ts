@@ -33,7 +33,7 @@ export class PerspectiveProjector {
   readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
   readonly laneWorldSpacing = (126 * this.nearDistance) / this.focalLength;
   readonly nearScale = 1.3;
-  readonly spawnProgress = 0.2;
+  readonly spawnProgress = 0.075;
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {
