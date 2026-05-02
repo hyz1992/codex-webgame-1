@@ -1,5 +1,5 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
-import { TRACK_HORIZON_Y } from './layout';
+import { LANE_WORLD_SPACING_AT_NEAR, PROJECTED_NEAR_SCALE, TRACK_BOTTOM_EDGE_MULTIPLIER, TRACK_HORIZON_Y } from './layout';
 
 export interface ProjectedLanePoint {
   x: number;
@@ -32,8 +32,8 @@ export class PerspectiveProjector {
   readonly focalLength = this.viewportHalfHeight / Math.tan(this.verticalFovRadians / 2);
   readonly nearDistance = 420;
   readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
-  readonly laneWorldSpacing = (126 * this.nearDistance) / this.focalLength;
-  readonly nearScale = 1.62;
+  readonly laneWorldSpacing = (LANE_WORLD_SPACING_AT_NEAR * this.nearDistance) / this.focalLength;
+  readonly nearScale = PROJECTED_NEAR_SCALE;
   readonly spawnProgress = 0.075;
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
@@ -65,8 +65,8 @@ export class PerspectiveProjector {
     return {
       topLeft: { x: this.centerX - top.laneSpacing, y: this.horizonY },
       topRight: { x: this.centerX + top.laneSpacing, y: this.horizonY },
-      bottomRight: { x: this.centerX + bottom.laneSpacing * 2.08, y: this.bottomY },
-      bottomLeft: { x: this.centerX - bottom.laneSpacing * 2.08, y: this.bottomY },
+      bottomRight: { x: this.centerX + bottom.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.bottomY },
+      bottomLeft: { x: this.centerX - bottom.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.bottomY },
     };
   }
 

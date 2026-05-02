@@ -147,7 +147,7 @@ export function collectShield(state: RunState): RunState {
 
   return {
     ...state,
-    shields: Math.min(1, state.shields + 1),
+    shields: state.shields + 1,
   };
 }
 

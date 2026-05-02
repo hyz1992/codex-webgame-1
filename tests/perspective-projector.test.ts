@@ -22,7 +22,7 @@ describe('PerspectiveProjector', () => {
 
     expect(far.scale).toBeLessThan(near.scale);
     expect(far.depth).toBeLessThan(near.depth);
-    expect(near.scale).toBeGreaterThan(0.9);
+    expect(near.scale).toBeGreaterThan(1.2);
   });
 
   it('跑道近端比远端更宽', () => {
@@ -30,6 +30,7 @@ describe('PerspectiveProjector', () => {
     const polygon = projector.trackPolygon();
 
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThan(polygon.topRight.x - polygon.topLeft.x);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThan(620);
     expect(polygon.topLeft.y).toBeLessThan(polygon.bottomLeft.y);
   });
 

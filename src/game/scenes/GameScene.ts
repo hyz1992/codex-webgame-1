@@ -9,9 +9,10 @@ import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
-import { PLAYER_ANCHOR_Y } from '../visual/layout';
+import { ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
 import { playerRunPose } from '../visual/playerRunPose';
+import { neonSunsetTheme } from '../visual/theme';
 
 export const RUN_STATE_EVENT = 'run-state-change';
 const GAME_ACTION_EVENT = 'game-action';
@@ -30,6 +31,7 @@ export class GameScene extends Phaser.Scene {
   private items: MovingVisualItem[] = [];
   private elapsedMs = 0;
   private spawnTimerMs = 0;
+  private motionStartedMs = 0;
 
   constructor() {
     super('GameScene');
@@ -61,6 +63,7 @@ export class GameScene extends Phaser.Scene {
     this.items = [];
     this.elapsedMs = 0;
     this.spawnTimerMs = 0;
+    this.motionStartedMs = 0;
   }
 
   private readonly handleGameAction = (action: GameAction): void => {
@@ -120,13 +123,18 @@ export class GameScene extends Phaser.Scene {
     }
 
     const beforeLane = this.laneController.snapshot().lane;
+    if (action === 'jump' || action === 'slide') {
+      this.motionStartedMs = this.elapsedMs;
+    }
     this.laneController.applyAction(action);
     const afterLane = this.laneController.snapshot().lane;
     if (afterLane !== beforeLane) {
       this.effects.playLaneChange(this.player, afterLane);
     }
 
-    this.time.delayedCall(280, () => {
+    const actionDurationMs =
+      action === 'jump' ? neonSunsetTheme.motion.jumpMs : action === 'slide' ? neonSunsetTheme.motion.slideMs : 280;
+    this.time.delayedCall(actionDurationMs, () => {
       this.laneController.endActionState();
     });
   }
@@ -184,8 +192,14 @@ export class GameScene extends Phaser.Scene {
   private syncPlayerPosition(): void {
     const snapshot = this.laneController.snapshot();
     const projected = this.projector.projectLane(snapshot.lane, PLAYER_ANCHOR_Y);
-    const pose = playerRunPose(this.elapsedMs, this.runState.hasStarted && !this.runState.isPaused && !this.runState.isGameOver, this.runState.isBoosting);
-    const motionScaleY = snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 0.86 : 1;
+    const pose = playerRunPose(
+      this.elapsedMs,
+      this.runState.hasStarted && !this.runState.isPaused && !this.runState.isGameOver,
+      this.runState.isBoosting,
+      snapshot.motion,
+      this.elapsedMs - this.motionStartedMs,
+    );
+    const motionScaleY = snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 1.04 : 1;
     this.player.container.x = Phaser.Math.Linear(this.player.container.x, projected.x, 0.35);
     this.player.container.y = projected.y + pose.yOffset;
     this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale * motionScaleY);
@@ -196,7 +210,7 @@ export class GameScene extends Phaser.Scene {
     const projected = this.projector.projectLaneAtProgress(item.lane, item.roadProgress);
     item.container.x = projected.x;
     item.container.y = projected.y;
-    item.container.setScale(projected.scale);
+    item.container.setScale(projected.scale * ITEM_VISUAL_SCALE);
     item.container.setAlpha(projected.alpha);
     item.container.setDepth(projected.depth);
   }

@@ -13,4 +13,14 @@ describe('playerRunPose', () => {
   it('keeps the player visually anchored when the run is inactive', () => {
     expect(playerRunPose(120, false, false).yOffset).toBe(0);
   });
+
+  it('uses an upward arc for jumps instead of only squashing the sprite', () => {
+    const start = playerRunPose(0, true, false, 'jumping', 0);
+    const airborne = playerRunPose(160, true, false, 'jumping', 160);
+    const landing = playerRunPose(320, true, false, 'jumping', 320);
+
+    expect(start.yOffset).toBe(0);
+    expect(airborne.yOffset).toBeLessThan(-36);
+    expect(landing.yOffset).toBeCloseTo(0, 5);
+  });
 });

@@ -3,7 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { getLaneItemVisual, neonSunsetTheme } from './theme';
 import { PerspectiveProjector } from './PerspectiveProjector';
-import { PLAYER_ANCHOR_Y } from './layout';
+import { ITEM_GROUND_SHADOW_ALPHA, ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from './layout';
 
 export interface PlayerVisual {
   container: Phaser.GameObjects.Container;
@@ -168,6 +168,9 @@ export class GameVisualFactory {
     const spawn = this.projector.projectLaneAtProgress(item.lane, roadProgress);
     const container = this.scene.add.container(spawn.x, spawn.y);
     const hitArea = this.scene.add.rectangle(0, -22, 44, 44, fill, 0);
+    const shadow = this.scene.add.ellipse(0, 0, 62, 14, 0x020817, ITEM_GROUND_SHADOW_ALPHA);
+    shadow.setStrokeStyle(1, glow, 0.18);
+    container.add(shadow);
 
     if (visual.shape === 'orb') {
       const orb = this.scene.add.circle(0, -13, 13, fill, 1);
@@ -201,7 +204,7 @@ export class GameVisualFactory {
 
     container.add(hitArea);
     container.setDepth(3);
-    container.setScale(spawn.scale);
+    container.setScale(spawn.scale * ITEM_VISUAL_SCALE);
     return { ...item, container, hitArea, roadProgress };
   }
 

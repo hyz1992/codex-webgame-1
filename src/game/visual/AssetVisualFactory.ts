@@ -3,7 +3,12 @@ import { gameAssetManifest, getLaneItemAsset } from '../assets/assetManifest';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
-import { CITY_BACKGROUND_Y_OFFSET, SUNSET_BACKGROUND_Y_OFFSET } from './layout';
+import {
+  CITY_BACKGROUND_Y_OFFSET,
+  ITEM_GROUND_SHADOW_ALPHA,
+  ITEM_VISUAL_SCALE,
+  SUNSET_BACKGROUND_Y_OFFSET,
+} from './layout';
 import { PerspectiveProjector } from './PerspectiveProjector';
 
 export class AssetVisualFactory {
@@ -61,12 +66,20 @@ export class AssetVisualFactory {
     const projected = this.projector.projectLaneAtProgress(item.lane, roadProgress);
     const container = this.scene.add.container(projected.x, projected.y);
     const hitArea = this.scene.add.rectangle(0, -asset.display.height / 2, asset.display.width, asset.display.height, 0xffffff, 0);
+    const shadow = this.scene.add.ellipse(
+      0,
+      0,
+      asset.display.width * 1.18,
+      Math.max(10, asset.display.height * 0.22),
+      0x020817,
+      ITEM_GROUND_SHADOW_ALPHA,
+    );
     const sprite = this.scene.add.image(0, 0, asset.key);
     sprite.setDisplaySize(asset.display.width, asset.display.height);
     sprite.setOrigin(asset.origin.x, 1);
-    container.add([sprite, hitArea]);
+    container.add([shadow, sprite, hitArea]);
     container.setDepth(3);
-    container.setScale(projected.scale);
+    container.setScale(projected.scale * ITEM_VISUAL_SCALE);
     return { ...item, container, hitArea, roadProgress };
   }
 

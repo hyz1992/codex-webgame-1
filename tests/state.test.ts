@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addDistance,
   collectEnergy,
+  collectShield,
   createInitialRunState,
   damagePlayer,
   resetRun,
@@ -33,6 +34,12 @@ describe('RunState', () => {
 
     state = damagePlayer(state, 'normal');
     expect(state.isGameOver).toBe(true);
+  });
+
+  it('拾取护盾会在现有护盾值上加一，不会把调试护盾压回一', () => {
+    const state = collectShield(startRun({ ...createInitialRunState(), shields: 10000 }));
+
+    expect(state.shields).toBe(10001);
   });
 
   it('危险伤害直接结束本局', () => {
