@@ -46,7 +46,7 @@ describe('PerspectiveProjector', () => {
     const spawn = projector.projectLane(1, projector.spawnY);
 
     expect(projector.spawnY).toBeGreaterThanOrEqual(projector.horizonY);
-    expect(projector.spawnY).toBeLessThan(160);
+    expect(projector.spawnY).toBeLessThan(300);
     expect(spawn.y).toBe(projector.spawnY);
     expect(spawn.scale).toBeLessThan(0.45);
   });
@@ -95,5 +95,22 @@ describe('PerspectiveProjector', () => {
       expect(object.x).toBeCloseTo(point.x, 5);
       expect(object.y).toBeCloseTo(point.y, 5);
     }
+  });
+
+  it('derives perspective from a trigonometric camera focal length', () => {
+    const projector = new PerspectiveProjector();
+    const expectedFocalLength = projector.viewportHalfHeight / Math.tan(projector.verticalFovRadians / 2);
+
+    expect(projector.focalLength).toBeCloseTo(expectedFocalLength, 5);
+  });
+
+  it('keeps object scale locked to the same depth ratio as lane spacing', () => {
+    const projector = new PerspectiveProjector();
+    const spawn = projector.projectLaneAtProgress(0, projector.spawnProgress);
+    const near = projector.projectLaneAtProgress(0, 0.9);
+    const spawnOffset = projector.centerX - spawn.x;
+    const nearOffset = projector.centerX - near.x;
+
+    expect(near.scale / spawn.scale).toBeCloseTo(nearOffset / spawnOffset, 4);
   });
 });

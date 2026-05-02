@@ -24,33 +24,36 @@ export interface TrackLanePoint {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = 72;
-  readonly spawnY = 156;
-  readonly bottomY = GAME_HEIGHT + 132;
-  readonly spawnProgress = (this.spawnY - this.horizonY) / (this.bottomY - this.horizonY);
-  readonly farLaneSpacing = 0;
-  readonly nearLaneSpacing = 128;
-  readonly farScale = 0.1;
-  readonly nearScale = 1.14;
+  readonly horizonY = 86;
+  readonly bottomY = GAME_HEIGHT + 120;
+  readonly viewportHalfHeight = GAME_HEIGHT / 2;
+  readonly verticalFovRadians = (56 * Math.PI) / 180;
+  readonly focalLength = this.viewportHalfHeight / Math.tan(this.verticalFovRadians / 2);
+  readonly nearDistance = 420;
+  readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
+  readonly laneWorldSpacing = (126 * this.nearDistance) / this.focalLength;
+  readonly nearScale = 1.3;
+  readonly spawnProgress = 0.2;
+  readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {
     return this.projectLaneAtProgress(lane, this.normalizedDepth(y));
   }
 
   projectLaneAtProgress(lane: number, progress: number): ProjectedLanePoint {
-    const t = this.clamp01(progress);
-    const y = this.lerp(this.horizonY, this.bottomY, t);
-    const perspective = this.perspectiveAmountAtProgress(t);
-    const laneSpacing = this.lerp(this.farLaneSpacing, this.nearLaneSpacing, perspective);
-    const scale = this.lerp(this.farScale, this.nearScale, perspective);
+    const perspective = this.clamp01(progress);
+    const distance = perspective === 0 ? Number.POSITIVE_INFINITY : this.nearDistance / perspective;
+    const projectedGroundY = distance === Number.POSITIVE_INFINITY ? 0 : (this.cameraHeight * this.focalLength) / distance;
+    const laneSpacing = distance === Number.POSITIVE_INFINITY ? 0 : (this.laneWorldSpacing * this.focalLength) / distance;
+    const scale = this.nearScale * perspective;
 
     return {
       x: this.centerX + (lane - 1) * laneSpacing,
-      y,
+      y: this.horizonY + projectedGroundY,
       laneSpacing,
       scale,
       depth: 2 + perspective * 6,
-      alpha: this.lerp(0.38, 1, perspective),
+      alpha: this.lerp(0.32, 1, perspective),
     };
   }
 
@@ -61,8 +64,8 @@ export class PerspectiveProjector {
     return {
       topLeft: { x: this.centerX - top.laneSpacing, y: this.horizonY },
       topRight: { x: this.centerX + top.laneSpacing, y: this.horizonY },
-      bottomRight: { x: this.centerX + bottom.laneSpacing * 2.05, y: this.bottomY },
-      bottomLeft: { x: this.centerX - bottom.laneSpacing * 2.05, y: this.bottomY },
+      bottomRight: { x: this.centerX + bottom.laneSpacing * 2.08, y: this.bottomY },
+      bottomLeft: { x: this.centerX - bottom.laneSpacing * 2.08, y: this.bottomY },
     };
   }
 
@@ -93,11 +96,7 @@ export class PerspectiveProjector {
   }
 
   perspectiveAmount(y: number): number {
-    return this.perspectiveAmountAtProgress(this.normalizedDepth(y));
-  }
-
-  private perspectiveAmountAtProgress(progress: number): number {
-    return Math.pow(this.clamp01(progress), 0.55);
+    return this.normalizedDepth(y);
   }
 
   private clamp01(value: number): number {

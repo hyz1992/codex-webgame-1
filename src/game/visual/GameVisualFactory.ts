@@ -63,16 +63,26 @@ export class GameVisualFactory {
     const polygon = this.projector.trackPolygon();
 
     graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
-    graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
+    graphics.fillPoints([polygon.topLeft, polygon.bottomRight, polygon.bottomLeft], true);
     graphics.lineStyle(2, neonSunsetTheme.colors.laneCyan, 0.34);
     graphics.lineBetween(polygon.topLeft.x, polygon.topLeft.y, polygon.bottomLeft.x, polygon.bottomLeft.y);
     graphics.lineBetween(polygon.topRight.x, polygon.topRight.y, polygon.bottomRight.x, polygon.bottomRight.y);
     container.add(graphics);
 
-    for (let y = this.projector.horizonY + 28; y < GAME_HEIGHT + 24; y += 56) {
-      const left = this.projector.trackEdgeX(-1.45, y);
-      const right = this.projector.trackEdgeX(1.45, y);
-      const grid = this.scene.add.line(0, 0, left, y, right, y, neonSunsetTheme.colors.laneCyan, neonSunsetTheme.track.gridAlpha);
+    for (let progress = 0.14; progress < 1; progress += 0.085) {
+      const projected = this.projector.projectLaneAtProgress(1, progress);
+      const left = this.projector.trackEdgeX(-1.45, projected.y);
+      const right = this.projector.trackEdgeX(1.45, projected.y);
+      const grid = this.scene.add.line(
+        0,
+        0,
+        left,
+        projected.y,
+        right,
+        projected.y,
+        neonSunsetTheme.colors.laneCyan,
+        neonSunsetTheme.track.gridAlpha,
+      );
       grid.setOrigin(0, 0);
       container.add(grid);
     }
