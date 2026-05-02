@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import { gameAssetManifest, getLaneItemAsset } from '../assets/assetManifest';
-import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
+import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
+import { PerspectiveProjector } from './PerspectiveProjector';
 
 export class AssetVisualFactory {
+  private readonly projector = new PerspectiveProjector();
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly fallback: GameVisualFactory,
@@ -32,12 +35,14 @@ export class AssetVisualFactory {
     }
 
     const grid = this.scene.add.tileSprite(GAME_WIDTH / 2, GAME_HEIGHT / 2, 290, GAME_HEIGHT, 'track-speed-grid');
-    const leftGlow = this.scene.add.image(GAME_WIDTH / 2 - 145, GAME_HEIGHT / 2, 'track-edge-glow');
-    const rightGlow = this.scene.add.image(GAME_WIDTH / 2 + 145, GAME_HEIGHT / 2, 'track-edge-glow');
-    grid.setAlpha(0.45);
+    const leftGlow = this.scene.add.image(this.projector.trackEdgeX(-1.5, GAME_HEIGHT - 80), GAME_HEIGHT / 2, 'track-edge-glow');
+    const rightGlow = this.scene.add.image(this.projector.trackEdgeX(1.5, GAME_HEIGHT - 80), GAME_HEIGHT / 2, 'track-edge-glow');
+    grid.setAlpha(0.22);
     leftGlow.setDisplaySize(64, GAME_HEIGHT);
+    leftGlow.setAlpha(0.22);
     rightGlow.setDisplaySize(64, GAME_HEIGHT);
     rightGlow.setFlipX(true);
+    rightGlow.setAlpha(0.22);
     track.add([grid, leftGlow, rightGlow]);
     return track;
   }
@@ -65,13 +70,15 @@ export class AssetVisualFactory {
       return this.fallback.createLaneItem(item);
     }
 
-    const container = this.scene.add.container(LANE_X[item.lane], -40);
+    const projected = this.projector.projectLane(item.lane, -40);
+    const container = this.scene.add.container(projected.x, projected.y);
     const hitArea = this.scene.add.rectangle(0, 0, asset.display.width, asset.display.height, 0xffffff, 0);
     const sprite = this.scene.add.image(0, 0, asset.key);
     sprite.setDisplaySize(asset.display.width, asset.display.height);
     sprite.setOrigin(asset.origin.x, asset.origin.y);
     container.add([sprite, hitArea]);
     container.setDepth(3);
+    container.setScale(projected.scale);
     return { ...item, container, hitArea };
   }
 

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, LANE_X } from '../config';
+import { GAME_HEIGHT } from '../config';
 import type { GameAction } from '../actions';
 import { preloadGameAssets } from '../assets/preloadGameAssets';
 import { LaneController } from '../lane/LaneController';
@@ -9,6 +9,7 @@ import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from '../visual/GameVisualFactory';
+import { PerspectiveProjector } from '../visual/PerspectiveProjector';
 
 export const RUN_STATE_EVENT = 'run-state-change';
 const GAME_ACTION_EVENT = 'game-action';
@@ -18,6 +19,9 @@ export class GameScene extends Phaser.Scene {
   private visualFactory!: GameVisualFactory;
   private assetVisualFactory!: AssetVisualFactory;
   private effects!: EffectController;
+  private readonly projector = new PerspectiveProjector();
+  private debugGraphics?: Phaser.GameObjects.Graphics;
+  private readonly debugHitboxesEnabled = new URLSearchParams(window.location.search).get('debug') === '1';
   private laneController = new LaneController();
   private runState: RunState = createInitialRunState();
   private spawner = new ObstacleSpawner(1);
@@ -42,6 +46,7 @@ export class GameScene extends Phaser.Scene {
     this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
     this.effects.createSpeedLines();
+    this.debugGraphics = this.debugHitboxesEnabled ? this.add.graphics().setDepth(20) : undefined;
     this.publishState();
 
     this.bindActionHandler();
@@ -80,9 +85,10 @@ export class GameScene extends Phaser.Scene {
       this.spawnPattern(secondsElapsed);
     }
 
+    this.syncPlayerPosition();
     this.moveItems(deltaMs);
     this.effects.updateBoost(this.runState.isBoosting);
-    this.syncPlayerPosition();
+    this.drawDebugHitboxes();
     this.publishState();
   }
 
@@ -128,7 +134,9 @@ export class GameScene extends Phaser.Scene {
     const items = [...pattern.hazards, ...pattern.pickups];
 
     for (const item of items) {
-      this.items.push(this.assetVisualFactory.createLaneItem(item));
+      const visualItem = this.assetVisualFactory.createLaneItem(item);
+      this.projectMovingItem(visualItem);
+      this.items.push(visualItem);
     }
   }
 
@@ -140,6 +148,7 @@ export class GameScene extends Phaser.Scene {
 
     for (const item of this.items) {
       item.container.y += pixels;
+      this.projectMovingItem(item);
 
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
         const beforeGameOver = this.runState.isGameOver;
@@ -171,8 +180,40 @@ export class GameScene extends Phaser.Scene {
 
   private syncPlayerPosition(): void {
     const snapshot = this.laneController.snapshot();
-    this.player.container.x = Phaser.Math.Linear(this.player.container.x, LANE_X[snapshot.lane], 0.35);
-    this.player.container.setScale(1, snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 0.86 : 1);
+    const projected = this.projector.projectLane(snapshot.lane, this.player.container.y);
+    const motionScaleY = snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 0.86 : 1;
+    this.player.container.x = Phaser.Math.Linear(this.player.container.x, projected.x, 0.35);
+    this.player.container.setScale(projected.scale, projected.scale * motionScaleY);
+    this.player.container.setDepth(6);
+  }
+
+  private projectMovingItem(item: MovingVisualItem): void {
+    const projected = this.projector.projectLane(item.lane, item.container.y);
+    item.container.x = projected.x;
+    item.container.setScale(projected.scale);
+    item.container.setAlpha(projected.alpha);
+    item.container.setDepth(projected.depth);
+  }
+
+  private drawDebugHitboxes(): void {
+    if (!this.debugGraphics) {
+      return;
+    }
+
+    this.debugGraphics.clear();
+    const playerBounds = this.player.hitArea.getBounds();
+    this.debugGraphics.lineStyle(2, 0x7ee787, 0.9);
+    this.debugGraphics.strokeRect(playerBounds.x, playerBounds.y, playerBounds.width, playerBounds.height);
+
+    this.debugGraphics.lineStyle(1, 0xef476f, 0.85);
+    for (const item of this.items) {
+      if (!item.container.active) {
+        continue;
+      }
+
+      const itemBounds = item.hitArea.getBounds();
+      this.debugGraphics.strokeRect(itemBounds.x, itemBounds.y, itemBounds.width, itemBounds.height);
+    }
   }
 
   private publishState(): void {

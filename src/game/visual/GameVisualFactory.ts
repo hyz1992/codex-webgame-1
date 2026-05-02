@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { getLaneItemVisual, neonSunsetTheme } from './theme';
+import { PerspectiveProjector } from './PerspectiveProjector';
 
 export interface PlayerVisual {
   container: Phaser.GameObjects.Container;
@@ -18,6 +19,8 @@ export interface MovingVisualItem extends LaneItem {
 }
 
 export class GameVisualFactory {
+  private readonly projector = new PerspectiveProjector();
+
   constructor(private readonly scene: Phaser.Scene) {}
 
   createBackground(): Phaser.GameObjects.Container {
@@ -55,38 +58,37 @@ export class GameVisualFactory {
 
   createTrack(): Phaser.GameObjects.Container {
     const container = this.scene.add.container(0, 0);
-    const track = this.scene.add.rectangle(
-      GAME_WIDTH / 2,
-      GAME_HEIGHT / 2,
-      neonSunsetTheme.track.width,
-      GAME_HEIGHT,
-      neonSunsetTheme.colors.track,
-      0.94,
-    );
-    container.add(track);
+    const graphics = this.scene.add.graphics();
+    const polygon = this.projector.trackPolygon();
 
-    for (let y = 36; y < GAME_HEIGHT; y += 54) {
-      const grid = this.scene.add.rectangle(
-        GAME_WIDTH / 2,
-        y,
-        neonSunsetTheme.track.width - 18,
-        1,
-        neonSunsetTheme.colors.laneCyan,
-        neonSunsetTheme.track.gridAlpha,
-      );
+    graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
+    graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
+    graphics.lineStyle(2, neonSunsetTheme.colors.laneCyan, 0.34);
+    graphics.strokePoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
+    container.add(graphics);
+
+    for (let y = this.projector.horizonY + 28; y < GAME_HEIGHT + 24; y += 56) {
+      const left = this.projector.trackEdgeX(-1.45, y);
+      const right = this.projector.trackEdgeX(1.45, y);
+      const grid = this.scene.add.line(0, 0, left, y, right, y, neonSunsetTheme.colors.laneCyan, neonSunsetTheme.track.gridAlpha);
+      grid.setOrigin(0, 0);
       container.add(grid);
     }
 
-    for (const [index, laneX] of LANE_X.entries()) {
-      const color = index === 1 ? neonSunsetTheme.colors.laneCyan : neonSunsetTheme.colors.lanePurple;
-      const line = this.scene.add.rectangle(
-        laneX,
-        GAME_HEIGHT / 2,
-        neonSunsetTheme.track.laneGlowWidth,
-        GAME_HEIGHT,
+    for (const edge of [-1.5, -0.5, 0.5, 1.5] as const) {
+      const color = Math.abs(edge) === 1.5 ? neonSunsetTheme.colors.lanePurple : neonSunsetTheme.colors.laneCyan;
+      const line = this.scene.add.line(
+        0,
+        0,
+        this.projector.trackEdgeX(edge, this.projector.horizonY),
+        this.projector.horizonY,
+        this.projector.trackEdgeX(edge, this.projector.bottomY),
+        this.projector.bottomY,
         color,
-        0.42,
+        Math.abs(edge) === 1.5 ? 0.58 : 0.46,
       );
+      line.setOrigin(0, 0);
+      line.setLineWidth(Math.abs(edge) === 1.5 ? 4 : 2);
       container.add(line);
     }
 
