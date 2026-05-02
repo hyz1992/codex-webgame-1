@@ -5,7 +5,7 @@ import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
 import { PerspectiveProjector } from './PerspectiveProjector';
 
-export const CITY_BACKGROUND_Y_OFFSET = -36;
+export const CITY_BACKGROUND_Y_OFFSET = -24;
 
 export class AssetVisualFactory {
   private readonly projector = new PerspectiveProjector();

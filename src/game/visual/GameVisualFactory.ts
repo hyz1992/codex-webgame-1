@@ -19,6 +19,29 @@ export interface MovingVisualItem extends LaneItem {
   roadProgress: number;
 }
 
+export const TRACK_FAR_FADE_PROGRESS = 0.18;
+
+export const TRACK_HORIZON_MIST = {
+  height: 54,
+  featherHeight: 92,
+  color: 0x06142f,
+  glowColor: 0x3f2f88,
+  coreAlpha: 0.52,
+  featherAlpha: 0.2,
+} as const;
+
+export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {
+  if (progress <= 0) {
+    return 0;
+  }
+
+  if (progress >= TRACK_FAR_FADE_PROGRESS) {
+    return baseAlpha;
+  }
+
+  return baseAlpha * (progress / TRACK_FAR_FADE_PROGRESS);
+}
+
 export class GameVisualFactory {
   private readonly projector = new PerspectiveProjector();
 
@@ -73,6 +96,7 @@ export class GameVisualFactory {
       const projected = this.projector.projectLaneAtProgress(1, progress);
       const left = this.projector.trackEdgeX(-1.45, projected.y);
       const right = this.projector.trackEdgeX(1.45, projected.y);
+      const alpha = trackFarFadeAlpha(progress, neonSunsetTheme.track.gridAlpha);
       const grid = this.scene.add.line(
         0,
         0,
@@ -81,7 +105,7 @@ export class GameVisualFactory {
         right,
         projected.y,
         neonSunsetTheme.colors.laneCyan,
-        neonSunsetTheme.track.gridAlpha,
+        alpha,
       );
       grid.setOrigin(0, 0);
       container.add(grid);
@@ -91,6 +115,8 @@ export class GameVisualFactory {
       const color = Math.abs(edge) === 1.5 ? neonSunsetTheme.colors.lanePurple : neonSunsetTheme.colors.laneCyan;
       this.strokeTrackCurve(graphics, edge, color, Math.abs(edge) === 1.5 ? 0.58 : 0.46, Math.abs(edge) === 1.5 ? 4 : 2);
     }
+
+    container.add(this.createHorizonMist());
 
     container.setDepth(1);
     return container;
@@ -180,12 +206,31 @@ export class GameVisualFactory {
 
   private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {
     const points = this.projector.trackLanePoints(edge, 18);
-    graphics.lineStyle(width, color, alpha);
-    graphics.beginPath();
-    graphics.moveTo(points[0].x, points[0].y);
-    for (const point of points.slice(1)) {
+    for (let index = 1; index < points.length; index += 1) {
+      const previous = points[index - 1];
+      const point = points[index];
+      const segmentAlpha = trackFarFadeAlpha((previous.progress + point.progress) / 2, alpha);
+      if (segmentAlpha <= 0.01) {
+        continue;
+      }
+
+      graphics.lineStyle(width, color, segmentAlpha);
+      graphics.beginPath();
+      graphics.moveTo(previous.x, previous.y);
       graphics.lineTo(point.x, point.y);
+      graphics.strokePath();
     }
-    graphics.strokePath();
+  }
+
+  private createHorizonMist(): Phaser.GameObjects.Graphics {
+    const mist = this.scene.add.graphics();
+    const y = this.projector.horizonY;
+    mist.fillStyle(TRACK_HORIZON_MIST.color, TRACK_HORIZON_MIST.featherAlpha);
+    mist.fillRect(0, y - TRACK_HORIZON_MIST.featherHeight / 2, GAME_WIDTH, TRACK_HORIZON_MIST.featherHeight);
+    mist.fillStyle(TRACK_HORIZON_MIST.glowColor, 0.14);
+    mist.fillRect(0, y - TRACK_HORIZON_MIST.height / 2, GAME_WIDTH, TRACK_HORIZON_MIST.height);
+    mist.fillStyle(TRACK_HORIZON_MIST.color, TRACK_HORIZON_MIST.coreAlpha);
+    mist.fillRect(0, y - TRACK_HORIZON_MIST.height / 3, GAME_WIDTH, TRACK_HORIZON_MIST.height * 0.56);
+    return mist;
   }
 }
