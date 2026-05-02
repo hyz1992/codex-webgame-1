@@ -37,8 +37,8 @@ describe('PerspectiveProjector', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
 
-    expect(projector.horizonY).toBeGreaterThan(GAME_HEIGHT * 0.5);
-    expect(projector.horizonY).toBeLessThan(GAME_HEIGHT * 0.65);
+    expect(projector.horizonY).toBeGreaterThan(GAME_HEIGHT * 0.45);
+    expect(projector.horizonY).toBeLessThan(GAME_HEIGHT * 0.54);
     expect(projector.spawnY).toBeLessThanOrEqual(projector.horizonY + 48);
     expect(polygon.bottomLeft.x).toBeLessThan(0);
     expect(polygon.bottomRight.x).toBeGreaterThan(390);

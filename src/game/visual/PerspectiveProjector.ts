@@ -24,7 +24,7 @@ export interface TrackLanePoint {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = Math.round(GAME_HEIGHT * 0.58);
+  readonly horizonY = Math.round(GAME_HEIGHT * 0.5);
   readonly bottomY = GAME_HEIGHT + 28;
   readonly viewportHalfHeight = GAME_HEIGHT / 2;
   readonly verticalFovRadians = (56 * Math.PI) / 180;
