@@ -123,17 +123,14 @@ describe('PerspectiveProjector', () => {
     expect(near.scale / spawn.scale).toBeCloseTo(nearOffset / spawnOffset, 4);
   });
 
-  it('keeps obstacle motion close to steady speed with only mild deceleration', () => {
+  it('keeps obstacles and roadside references moving at the same road-space rate', () => {
     const projector = new PerspectiveProjector();
     const earlyRate = projector.movementRateAtProgress(0.15);
     const midRate = projector.movementRateAtProgress(0.5);
     const lateRate = projector.movementRateAtProgress(0.85);
 
-    expect(earlyRate).toBeGreaterThan(midRate);
-    expect(midRate).toBeGreaterThan(lateRate);
-    expect(earlyRate).toBeLessThanOrEqual(1.04);
-    expect(lateRate).toBeGreaterThanOrEqual(0.93);
-    expect(lateRate).toBeGreaterThan(earlyRate * 0.9);
+    expect(earlyRate).toBeCloseTo(midRate, 5);
+    expect(midRate).toBeCloseTo(lateRate, 5);
   });
 
   it('continues projecting objects below the near edge so they leave the screen smoothly', () => {
@@ -165,7 +162,7 @@ describe('PerspectiveProjector', () => {
   it('loops roadside markers from the near exit back to the far end', () => {
     const projector = new PerspectiveProjector();
 
-    expect(projector.loopRoadsideProgress(projector.exitProgress + 0.02)).toBeCloseTo(projector.spawnProgress, 5);
+    expect(projector.loopRoadsideProgress(projector.exitProgress + 0.02)).toBeCloseTo(projector.spawnProgress + 0.02, 5);
     expect(projector.loopRoadsideProgress(0.42)).toBe(0.42);
   });
 });

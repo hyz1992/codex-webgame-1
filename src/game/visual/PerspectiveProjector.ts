@@ -63,9 +63,8 @@ export class PerspectiveProjector {
     };
   }
 
-  movementRateAtProgress(progress: number): number {
-    const t = this.smoothstep(0.22, 0.78, this.clamp01(progress));
-    return this.lerp(1.03, 0.95, t);
+  movementRateAtProgress(_progress: number): number {
+    return 1;
   }
 
   trackPolygon(): TrackPolygon {
@@ -124,7 +123,12 @@ export class PerspectiveProjector {
   }
 
   loopRoadsideProgress(progress: number): number {
-    return progress >= this.exitProgress ? this.spawnProgress : progress;
+    if (progress < this.exitProgress) {
+      return progress;
+    }
+
+    const range = this.exitProgress - this.spawnProgress;
+    return this.spawnProgress + ((progress - this.exitProgress) % range);
   }
 
   normalizedDepth(y: number): number {
@@ -143,8 +147,4 @@ export class PerspectiveProjector {
     return from + (to - from) * t;
   }
 
-  private smoothstep(edge0: number, edge1: number, value: number): number {
-    const t = this.clamp01((value - edge0) / (edge1 - edge0));
-    return t * t * (3 - 2 * t);
-  }
 }
