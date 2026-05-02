@@ -60,7 +60,7 @@ export class PerspectiveProjector {
 
   movementRateAtProgress(progress: number): number {
     const t = this.smoothstep(0.22, 0.78, this.clamp01(progress));
-    return this.lerp(1.38, 0.32, t);
+    return this.lerp(1.08, 0.84, t);
   }
 
   trackPolygon(): TrackPolygon {
