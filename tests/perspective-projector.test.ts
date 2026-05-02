@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { GAME_HEIGHT } from '../src/game/config';
 import { PerspectiveProjector } from '../src/game/visual/PerspectiveProjector';
 
 describe('PerspectiveProjector', () => {
@@ -36,7 +37,9 @@ describe('PerspectiveProjector', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
 
-    expect(projector.horizonY).toBeLessThanOrEqual(120);
+    expect(projector.horizonY).toBeGreaterThan(GAME_HEIGHT * 0.5);
+    expect(projector.horizonY).toBeLessThan(GAME_HEIGHT * 0.65);
+    expect(projector.spawnY).toBeLessThanOrEqual(projector.horizonY + 48);
     expect(polygon.bottomLeft.x).toBeLessThan(0);
     expect(polygon.bottomRight.x).toBeGreaterThan(390);
   });
@@ -46,7 +49,7 @@ describe('PerspectiveProjector', () => {
     const spawn = projector.projectLane(1, projector.spawnY);
 
     expect(projector.spawnY).toBeGreaterThanOrEqual(projector.horizonY);
-    expect(projector.spawnY).toBeLessThan(300);
+    expect(projector.spawnY).toBeLessThan(projector.horizonY + 80);
     expect(spawn.y).toBe(projector.spawnY);
     expect(spawn.scale).toBeLessThan(0.45);
   });

@@ -24,15 +24,15 @@ export interface TrackLanePoint {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = 86;
-  readonly bottomY = GAME_HEIGHT + 120;
+  readonly horizonY = Math.round(GAME_HEIGHT * 0.58);
+  readonly bottomY = GAME_HEIGHT + 28;
   readonly viewportHalfHeight = GAME_HEIGHT / 2;
   readonly verticalFovRadians = (56 * Math.PI) / 180;
   readonly focalLength = this.viewportHalfHeight / Math.tan(this.verticalFovRadians / 2);
   readonly nearDistance = 420;
   readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
   readonly laneWorldSpacing = (126 * this.nearDistance) / this.focalLength;
-  readonly nearScale = 1.3;
+  readonly nearScale = 1.62;
   readonly spawnProgress = 0.075;
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
