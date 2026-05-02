@@ -18,12 +18,13 @@ export interface TrackPolygon {
 
 export class PerspectiveProjector {
   readonly centerX = GAME_WIDTH / 2;
-  readonly horizonY = 184;
-  readonly bottomY = GAME_HEIGHT + 78;
-  readonly farLaneSpacing = 24;
-  readonly nearLaneSpacing = 96;
-  readonly farScale = 0.38;
-  readonly nearScale = 1.08;
+  readonly horizonY = 104;
+  readonly spawnY = 118;
+  readonly bottomY = GAME_HEIGHT + 104;
+  readonly farLaneSpacing = 12;
+  readonly nearLaneSpacing = 116;
+  readonly farScale = 0.26;
+  readonly nearScale = 1.14;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {
     const t = this.normalizedDepth(y);
@@ -37,7 +38,7 @@ export class PerspectiveProjector {
       laneSpacing,
       scale,
       depth: 2 + t * 5,
-      alpha: this.lerp(0.58, 1, t),
+      alpha: this.lerp(0.42, 1, t),
     };
   }
 
@@ -46,10 +47,10 @@ export class PerspectiveProjector {
     const bottom = this.projectLane(1, this.bottomY);
 
     return {
-      topLeft: { x: this.centerX - top.laneSpacing * 1.65, y: this.horizonY },
-      topRight: { x: this.centerX + top.laneSpacing * 1.65, y: this.horizonY },
-      bottomRight: { x: this.centerX + bottom.laneSpacing * 1.7, y: this.bottomY },
-      bottomLeft: { x: this.centerX - bottom.laneSpacing * 1.7, y: this.bottomY },
+      topLeft: { x: this.centerX - top.laneSpacing * 0.9, y: this.horizonY },
+      topRight: { x: this.centerX + top.laneSpacing * 0.9, y: this.horizonY },
+      bottomRight: { x: this.centerX + bottom.laneSpacing * 1.95, y: this.bottomY },
+      bottomLeft: { x: this.centerX - bottom.laneSpacing * 1.95, y: this.bottomY },
     };
   }
 

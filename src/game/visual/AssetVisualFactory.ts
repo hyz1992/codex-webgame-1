@@ -70,7 +70,7 @@ export class AssetVisualFactory {
       return this.fallback.createLaneItem(item);
     }
 
-    const projected = this.projector.projectLane(item.lane, -40);
+    const projected = this.projector.projectLane(item.lane, this.projector.spawnY);
     const container = this.scene.add.container(projected.x, projected.y);
     const hitArea = this.scene.add.rectangle(0, 0, asset.display.width, asset.display.height, 0xffffff, 0);
     const sprite = this.scene.add.image(0, 0, asset.key);

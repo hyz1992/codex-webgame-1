@@ -64,7 +64,8 @@ export class GameVisualFactory {
     graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
     graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
     graphics.lineStyle(2, neonSunsetTheme.colors.laneCyan, 0.34);
-    graphics.strokePoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
+    graphics.lineBetween(polygon.topLeft.x, polygon.topLeft.y, polygon.bottomLeft.x, polygon.bottomLeft.y);
+    graphics.lineBetween(polygon.topRight.x, polygon.topRight.y, polygon.bottomRight.x, polygon.bottomRight.y);
     container.add(graphics);
 
     for (let y = this.projector.horizonY + 28; y < GAME_HEIGHT + 24; y += 56) {
@@ -137,7 +138,8 @@ export class GameVisualFactory {
     const visual = getLaneItemVisual(item.kind);
     const fill = Number(visual.fill);
     const glow = Number(visual.glow);
-    const container = this.scene.add.container(LANE_X[item.lane], -40);
+    const spawn = this.projector.projectLane(item.lane, this.projector.spawnY);
+    const container = this.scene.add.container(spawn.x, spawn.y);
     const hitArea = this.scene.add.rectangle(0, 0, 44, 44, fill, 0);
 
     if (visual.shape === 'orb') {

@@ -31,4 +31,23 @@ describe('PerspectiveProjector', () => {
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThan(polygon.topRight.x - polygon.topLeft.x);
     expect(polygon.topLeft.y).toBeLessThan(polygon.bottomLeft.y);
   });
+
+  it('跑道从天边开始并在近端宽出屏幕边缘', () => {
+    const projector = new PerspectiveProjector();
+    const polygon = projector.trackPolygon();
+
+    expect(projector.horizonY).toBeLessThanOrEqual(120);
+    expect(polygon.bottomLeft.x).toBeLessThan(0);
+    expect(polygon.bottomRight.x).toBeGreaterThan(390);
+  });
+
+  it('障碍从跑道远端生成，而不是从屏幕上方掉落', () => {
+    const projector = new PerspectiveProjector();
+    const spawn = projector.projectLane(1, projector.spawnY);
+
+    expect(projector.spawnY).toBeGreaterThanOrEqual(projector.horizonY);
+    expect(projector.spawnY).toBeLessThan(160);
+    expect(spawn.y).toBe(projector.spawnY);
+    expect(spawn.scale).toBeLessThan(0.45);
+  });
 });
