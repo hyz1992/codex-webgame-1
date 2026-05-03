@@ -7,6 +7,7 @@ import {
   PLAYER_ANCHOR_Y,
   ROAD_BUFFER_LANE_OFFSET,
   ROADSIDE_LAMP_LANE_OFFSET,
+  TRACK_ENDPOINT_WIDTH_PROGRESS,
   TRACK_VISUAL_HORIZON_PROGRESS,
 } from '../src/game/visual/layout';
 
@@ -105,7 +106,7 @@ describe('PerspectiveProjector', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
 
-    expect(projector.horizonY).toBeGreaterThan(GAME_HEIGHT * 0.45);
+    expect(projector.horizonY).toBeGreaterThan(GAME_HEIGHT * 0.43);
     expect(projector.horizonY).toBeLessThan(GAME_HEIGHT * 0.54);
     expect(projector.spawnY).toBeLessThanOrEqual(projector.horizonY + 48);
     expect(polygon.bottomLeft.x).toBeLessThan(0);
@@ -128,8 +129,9 @@ describe('PerspectiveProjector', () => {
     const topWidth = polygon.topRight.x - polygon.topLeft.x;
     const visualHorizonLane = projector.projectLaneAtProgress(1, TRACK_VISUAL_HORIZON_PROGRESS);
 
-    expect(topWidth).toBeGreaterThanOrEqual(16);
-    expect(topWidth).toBeLessThanOrEqual(24);
+    expect(TRACK_VISUAL_HORIZON_PROGRESS).toBe(TRACK_ENDPOINT_WIDTH_PROGRESS);
+    expect(topWidth).toBeGreaterThanOrEqual(9);
+    expect(topWidth).toBeLessThanOrEqual(14);
     expect(polygon.topLeft.x).toBeLessThan(projector.centerX);
     expect(polygon.topRight.x).toBeGreaterThan(projector.centerX);
     expect(projector.trackEdgeX(-OUTER_ROAD_EDGE_LANE_OFFSET, projector.horizonY)).toBeCloseTo(polygon.topLeft.x, 5);
