@@ -7,6 +7,7 @@ import {
   CITY_BACKGROUND_Y_OFFSET,
   SCENE_ALIGNMENT_Y_OFFSET,
   SUNSET_BACKGROUND_Y_OFFSET,
+  TRACK_ENDPOINT_Y_OFFSET,
   TRACK_HORIZON_Y,
 } from '../src/game/visual/layout';
 import {
@@ -21,11 +22,16 @@ describe('background layout', () => {
     expect(CITY_BACKGROUND_Y_OFFSET).toBeLessThan(0);
   });
 
-  it('aligns the track end, city base, and sunset with one shared vertical offset', () => {
+  it('aligns the city base and sunset with one shared vertical offset', () => {
     expect(SCENE_ALIGNMENT_Y_OFFSET).toBeLessThan(0);
-    expect(TRACK_HORIZON_Y).toBe(BASE_TRACK_HORIZON_Y + SCENE_ALIGNMENT_Y_OFFSET);
     expect(CITY_BACKGROUND_Y_OFFSET).toBe(BASE_CITY_BACKGROUND_Y_OFFSET + SCENE_ALIGNMENT_Y_OFFSET);
     expect(SUNSET_BACKGROUND_Y_OFFSET).toBe(BASE_SUNSET_BACKGROUND_Y_OFFSET + SCENE_ALIGNMENT_Y_OFFSET);
+  });
+
+  it('keeps a separate manual tune offset for the bridge endpoint', () => {
+    expect(TRACK_ENDPOINT_Y_OFFSET).toBeLessThan(0);
+    expect(TRACK_HORIZON_Y).toBe(BASE_TRACK_HORIZON_Y + SCENE_ALIGNMENT_Y_OFFSET + TRACK_ENDPOINT_Y_OFFSET);
+    expect(CITY_BACKGROUND_Y_OFFSET).toBe(BASE_CITY_BACKGROUND_Y_OFFSET + SCENE_ALIGNMENT_Y_OFFSET);
   });
 
   it('uses the shared layout constants when rendering the asset background', () => {
