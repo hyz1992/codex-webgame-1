@@ -44,8 +44,9 @@ export interface LaneDashVisual {
   roadProgress: number;
 }
 
-export const TRACK_FAR_FADE_PROGRESS = 0.18;
+export const TRACK_FAR_FADE_PROGRESS = 0.13;
 export const TRACK_CURVE_SEGMENTS = 72;
+export const TRACK_SURFACE_ALPHA = 0.76;
 
 export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {
   if (progress <= 0) {
@@ -104,10 +105,8 @@ export class GameVisualFactory {
     const graphics = this.scene.add.graphics();
     const rightEdge = this.projector.trackLanePoints(OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS);
     const leftEdge = this.projector.trackLanePoints(-OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS);
-    const trackFillPoints = [...rightEdge, ...leftEdge.reverse()].map(({ x, y }) => ({ x, y }));
 
-    graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
-    graphics.fillPoints(trackFillPoints, true);
+    this.fillTrackSurface(graphics, rightEdge, leftEdge);
     container.add(graphics);
 
     for (const edge of [-MAIN_ROAD_EDGE_LANE_OFFSET, MAIN_ROAD_EDGE_LANE_OFFSET] as const) {
@@ -294,6 +293,35 @@ export class GameVisualFactory {
       graphics.moveTo(previous.x, previous.y);
       graphics.lineTo(point.x, point.y);
       graphics.strokePath();
+    }
+  }
+
+  private fillTrackSurface(
+    graphics: Phaser.GameObjects.Graphics,
+    rightEdge: ReadonlyArray<{ progress: number; x: number; y: number }>,
+    leftEdge: ReadonlyArray<{ progress: number; x: number; y: number }>,
+  ): void {
+    for (let index = 1; index < rightEdge.length; index += 1) {
+      const previousRight = rightEdge[index - 1];
+      const currentRight = rightEdge[index];
+      const previousLeft = leftEdge[index - 1];
+      const currentLeft = leftEdge[index];
+      const segmentProgress = (previousRight.progress + currentRight.progress) / 2;
+      const segmentAlpha = trackFarFadeAlpha(segmentProgress, TRACK_SURFACE_ALPHA);
+      if (segmentAlpha <= 0.01) {
+        continue;
+      }
+
+      graphics.fillStyle(neonSunsetTheme.colors.track, segmentAlpha);
+      graphics.fillPoints(
+        [
+          { x: previousLeft.x, y: previousLeft.y },
+          { x: previousRight.x, y: previousRight.y },
+          { x: currentRight.x, y: currentRight.y },
+          { x: currentLeft.x, y: currentLeft.y },
+        ],
+        true,
+      );
     }
   }
 

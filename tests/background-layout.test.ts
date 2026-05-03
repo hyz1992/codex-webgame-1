@@ -9,7 +9,12 @@ import {
   SUNSET_BACKGROUND_Y_OFFSET,
   TRACK_HORIZON_Y,
 } from '../src/game/visual/layout';
-import { TRACK_CURVE_SEGMENTS, trackFarFadeAlpha } from '../src/game/visual/GameVisualFactory';
+import {
+  TRACK_CURVE_SEGMENTS,
+  TRACK_FAR_FADE_PROGRESS,
+  TRACK_SURFACE_ALPHA,
+  trackFarFadeAlpha,
+} from '../src/game/visual/GameVisualFactory';
 
 describe('background layout', () => {
   it('keeps the city layer above its original base position', () => {
@@ -33,7 +38,7 @@ describe('background layout', () => {
 
   it('softens the bridge vanishing point by fading far track lines only', () => {
     expect(trackFarFadeAlpha(0, 0.58)).toBe(0);
-    expect(trackFarFadeAlpha(0.04, 0.58)).toBeLessThan(0.58 * (0.04 / 0.18));
+    expect(trackFarFadeAlpha(0.04, 0.58)).toBeLessThan(0.58 * (0.04 / TRACK_FAR_FADE_PROGRESS));
     expect(trackFarFadeAlpha(0.08, 0.58)).toBeLessThan(0.58);
     expect(trackFarFadeAlpha(0.2, 0.58)).toBe(0.58);
     expect(readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8')).not.toContain('createHorizonMist');
@@ -51,8 +56,18 @@ describe('background layout', () => {
 
     expect(factorySource).toContain('this.projector.trackLanePoints(OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS)');
     expect(factorySource).toContain('this.projector.trackLanePoints(-OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS)');
-    expect(factorySource).toContain('graphics.fillPoints(trackFillPoints, true)');
+    expect(factorySource).toContain('this.fillTrackSurface(graphics, rightEdge, leftEdge)');
     expect(factorySource).not.toContain('graphics.lineBetween(polygon.topLeft.x');
     expect(factorySource).not.toContain('graphics.lineBetween(polygon.topRight.x');
+  });
+
+  it('fades the far bridge surface with the same sampled edge geometry', () => {
+    const factorySource = readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8');
+
+    expect(TRACK_SURFACE_ALPHA).toBeGreaterThan(0.7);
+    expect(TRACK_FAR_FADE_PROGRESS).toBeLessThan(0.18);
+    expect(factorySource).toContain('trackFarFadeAlpha(segmentProgress, TRACK_SURFACE_ALPHA)');
+    expect(factorySource).toContain('{ x: previousLeft.x, y: previousLeft.y }');
+    expect(factorySource).not.toContain('trackFillPoints');
   });
 });
