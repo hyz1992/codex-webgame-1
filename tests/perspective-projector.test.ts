@@ -47,10 +47,10 @@ describe('PerspectiveProjector', () => {
     expect(playerAnchor.scale).toBeGreaterThanOrEqual(1.7);
     expect(playerAnchor.laneSpacing).toBeGreaterThanOrEqual(165);
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThanOrEqual(680);
-    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(playerAnchor.laneSpacing * 4.2);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(playerAnchor.laneSpacing * 4.8);
   });
 
-  it('路灯位于主路边缘外侧三分之一车道距离', () => {
+  it('路灯和道路外缘一起位于主路外侧三分之一车道距离', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
     const bottomLane = projector.projectLaneAtProgress(1, 1);
@@ -59,9 +59,10 @@ describe('PerspectiveProjector', () => {
     const leftLampLane = projector.projectLaneAtDistance(1, leftLamp.distance);
     const rightLampLane = projector.projectLaneAtDistance(1, rightLamp.distance);
 
-    expect(MAIN_ROAD_EDGE_LANE_OFFSET).toBe(1.5);
-    expect(ROADSIDE_LAMP_LANE_OFFSET).toBe(MAIN_ROAD_EDGE_LANE_OFFSET + 1 / 3);
-    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(bottomLane.laneSpacing * 3.3);
+    expect(MAIN_ROAD_EDGE_LANE_OFFSET).toBe(1.5 + 1 / 3);
+    expect(ROADSIDE_LAMP_LANE_OFFSET).toBe(MAIN_ROAD_EDGE_LANE_OFFSET);
+    expect(polygon.bottomRight.x).toBeCloseTo(projector.centerX + bottomLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
+    expect(polygon.bottomLeft.x).toBeCloseTo(projector.centerX - bottomLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
     expect(leftLamp.x).toBeCloseTo(projector.centerX - leftLampLane.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET, 5);
     expect(rightLamp.x).toBeCloseTo(projector.centerX + rightLampLane.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET, 5);
   });
