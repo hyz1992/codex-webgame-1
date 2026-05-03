@@ -102,10 +102,12 @@ export class GameVisualFactory {
   createTrack(): Phaser.GameObjects.Container {
     const container = this.scene.add.container(0, 0);
     const graphics = this.scene.add.graphics();
-    const polygon = this.projector.trackPolygon();
+    const rightEdge = this.projector.trackLanePoints(OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS);
+    const leftEdge = this.projector.trackLanePoints(-OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS);
+    const trackFillPoints = [...rightEdge, ...leftEdge.reverse()].map(({ x, y }) => ({ x, y }));
 
     graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
-    graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
+    graphics.fillPoints(trackFillPoints, true);
     container.add(graphics);
 
     for (const edge of [-MAIN_ROAD_EDGE_LANE_OFFSET, MAIN_ROAD_EDGE_LANE_OFFSET] as const) {

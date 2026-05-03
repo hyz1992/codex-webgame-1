@@ -46,12 +46,12 @@ describe('background layout', () => {
     expect(factorySource).toContain('trackLanePoints(edge, TRACK_CURVE_SEGMENTS)');
   });
 
-  it('renders the opened track horizon as a trapezoid without duplicate outer edge strokes', () => {
+  it('renders the opened track horizon from sampled edge points without duplicate outer edge strokes', () => {
     const factorySource = readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8');
 
-    expect(factorySource).toContain(
-      'graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true)',
-    );
+    expect(factorySource).toContain('this.projector.trackLanePoints(OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS)');
+    expect(factorySource).toContain('this.projector.trackLanePoints(-OUTER_ROAD_EDGE_LANE_OFFSET, TRACK_CURVE_SEGMENTS)');
+    expect(factorySource).toContain('graphics.fillPoints(trackFillPoints, true)');
     expect(factorySource).not.toContain('graphics.lineBetween(polygon.topLeft.x');
     expect(factorySource).not.toContain('graphics.lineBetween(polygon.topRight.x');
   });
