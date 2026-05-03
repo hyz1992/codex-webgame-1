@@ -46,15 +46,6 @@ export interface LaneDashVisual {
 
 export const TRACK_FAR_FADE_PROGRESS = 0.18;
 
-export const TRACK_HORIZON_MIST = {
-  height: 54,
-  featherHeight: 92,
-  color: 0x06142f,
-  glowColor: 0x3f2f88,
-  coreAlpha: 0.52,
-  featherAlpha: 0.2,
-} as const;
-
 export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {
   if (progress <= 0) {
     return 0;
@@ -121,8 +112,6 @@ export class GameVisualFactory {
     for (const edge of [-OUTER_ROAD_EDGE_LANE_OFFSET, OUTER_ROAD_EDGE_LANE_OFFSET] as const) {
       this.strokeTrackCurve(graphics, edge, neonSunsetTheme.colors.laneCyan, 0.48, 3);
     }
-
-    container.add(this.createHorizonMist());
 
     container.setDepth(1);
     return container;
@@ -301,18 +290,6 @@ export class GameVisualFactory {
       graphics.lineTo(point.x, point.y);
       graphics.strokePath();
     }
-  }
-
-  private createHorizonMist(): Phaser.GameObjects.Graphics {
-    const mist = this.scene.add.graphics();
-    const y = this.projector.horizonY;
-    mist.fillStyle(TRACK_HORIZON_MIST.color, TRACK_HORIZON_MIST.featherAlpha);
-    mist.fillRect(0, y - TRACK_HORIZON_MIST.featherHeight / 2, GAME_WIDTH, TRACK_HORIZON_MIST.featherHeight);
-    mist.fillStyle(TRACK_HORIZON_MIST.glowColor, 0.14);
-    mist.fillRect(0, y - TRACK_HORIZON_MIST.height / 2, GAME_WIDTH, TRACK_HORIZON_MIST.height);
-    mist.fillStyle(TRACK_HORIZON_MIST.color, TRACK_HORIZON_MIST.coreAlpha);
-    mist.fillRect(0, y - TRACK_HORIZON_MIST.height / 3, GAME_WIDTH, TRACK_HORIZON_MIST.height * 0.56);
-    return mist;
   }
 
 }

@@ -9,7 +9,7 @@ import {
   SUNSET_BACKGROUND_Y_OFFSET,
   TRACK_HORIZON_Y,
 } from '../src/game/visual/layout';
-import { TRACK_HORIZON_MIST, trackFarFadeAlpha } from '../src/game/visual/GameVisualFactory';
+import { trackFarFadeAlpha } from '../src/game/visual/GameVisualFactory';
 
 describe('background layout', () => {
   it('keeps the city layer above its original base position', () => {
@@ -31,11 +31,11 @@ describe('background layout', () => {
     expect(factorySource).toContain('SUNSET_BACKGROUND_Y_OFFSET');
   });
 
-  it('softens the bridge vanishing point with fade and mist', () => {
+  it('softens the bridge vanishing point by fading far track lines only', () => {
     expect(trackFarFadeAlpha(0, 0.58)).toBe(0);
     expect(trackFarFadeAlpha(0.08, 0.58)).toBeLessThan(0.58);
     expect(trackFarFadeAlpha(0.2, 0.58)).toBe(0.58);
-    expect(TRACK_HORIZON_MIST.height).toBeGreaterThanOrEqual(48);
+    expect(readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8')).not.toContain('createHorizonMist');
   });
 
   it('renders the opened track horizon as a trapezoid without duplicate outer edge strokes', () => {
