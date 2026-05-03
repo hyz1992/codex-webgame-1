@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { neonSunsetTheme } from '../src/game/visual/theme';
 
 describe('player hitbox', () => {
-  it('使用独立碰撞盒，尺寸小于视觉主体和拖尾范围', () => {
+  it('uses a wider and lower hitbox suited to a hover bike silhouette', () => {
+    expect(neonSunsetTheme.player.width).toBeGreaterThan(neonSunsetTheme.player.height);
     expect(neonSunsetTheme.player.hitbox.width).toBeLessThan(neonSunsetTheme.player.width);
     expect(neonSunsetTheme.player.hitbox.height).toBeLessThan(neonSunsetTheme.player.height + neonSunsetTheme.player.trailLength);
-    expect(neonSunsetTheme.player.hitbox.height).toBeLessThanOrEqual(44);
+    expect(neonSunsetTheme.player.hitbox.height).toBeLessThanOrEqual(36);
   });
 });

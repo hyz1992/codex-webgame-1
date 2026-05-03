@@ -40,7 +40,6 @@ export class GameScene extends Phaser.Scene {
   private laneDashes: LaneDashVisual[] = [];
   private elapsedMs = 0;
   private spawnTimerMs = 0;
-  private motionStartedMs = 0;
 
   constructor() {
     super('GameScene');
@@ -77,7 +76,6 @@ export class GameScene extends Phaser.Scene {
     this.laneDashes = [];
     this.elapsedMs = 0;
     this.spawnTimerMs = 0;
-    this.motionStartedMs = 0;
   }
 
   private readonly handleGameAction = (action: GameAction): void => {
@@ -139,20 +137,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     const beforeLane = this.laneController.snapshot().lane;
-    if (action === 'jump' || action === 'slide') {
-      this.motionStartedMs = this.elapsedMs;
-    }
     this.laneController.applyAction(action);
     const afterLane = this.laneController.snapshot().lane;
     if (afterLane !== beforeLane) {
       this.effects.playLaneChange(this.player, afterLane);
     }
-
-    const actionDurationMs =
-      action === 'jump' ? neonSunsetTheme.motion.jumpMs : action === 'slide' ? neonSunsetTheme.motion.slideMs : 280;
-    this.time.delayedCall(actionDurationMs, () => {
-      this.laneController.endActionState();
-    });
   }
 
   private spawnPattern(secondsElapsed: number): void {
@@ -266,12 +255,11 @@ export class GameScene extends Phaser.Scene {
       this.runState.hasStarted && !this.runState.isPaused && !this.runState.isGameOver,
       this.runState.isBoosting,
       snapshot.motion,
-      this.elapsedMs - this.motionStartedMs,
+      0,
     );
-    const motionScaleY = snapshot.motion === 'sliding' ? 0.62 : snapshot.motion === 'jumping' ? 1.04 : 1;
     this.player.container.x = Phaser.Math.Linear(this.player.container.x, projected.x, 0.35);
     this.player.container.y = projected.y + pose.yOffset;
-    this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale * motionScaleY);
+    this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale);
     this.player.container.setDepth(6);
   }
 

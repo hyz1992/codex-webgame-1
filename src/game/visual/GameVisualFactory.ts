@@ -8,6 +8,7 @@ import { getObstacleVisualProfile } from './obstacleVisualProfile';
 
 export interface PlayerVisual {
   container: Phaser.GameObjects.Container;
+  vehicleParts: Array<Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible>;
   body: Phaser.GameObjects.Rectangle;
   core: Phaser.GameObjects.Ellipse;
   trail: Phaser.GameObjects.Rectangle;
@@ -122,8 +123,8 @@ export class GameVisualFactory {
   createPlayer(): PlayerVisual {
     const trail = this.scene.add.rectangle(
       0,
-      28,
-      18,
+      16,
+      16,
       neonSunsetTheme.player.trailLength,
       neonSunsetTheme.colors.playerBody,
       0.24,
@@ -136,7 +137,10 @@ export class GameVisualFactory {
       neonSunsetTheme.colors.playerBody,
       1,
     );
-    const core = this.scene.add.ellipse(0, -6, 14, 18, neonSunsetTheme.colors.playerCore, 1);
+    const nose = this.scene.add.triangle(0, -20, -18, 10, 18, 10, 0, -16, neonSunsetTheme.colors.playerCore, 0.9);
+    const core = this.scene.add.ellipse(0, -2, 24, 14, neonSunsetTheme.colors.playerCore, 1);
+    const leftWing = this.scene.add.triangle(-24, 2, 0, -8, -26, 8, -42, 18, neonSunsetTheme.colors.playerBody, 0.9);
+    const rightWing = this.scene.add.triangle(24, 2, 0, -8, 26, 8, 42, 18, neonSunsetTheme.colors.playerBody, 0.9);
     const shieldRing = this.scene.add.circle(0, 0, 34, neonSunsetTheme.colors.playerBody, 0);
     const hitArea = this.scene.add.rectangle(
       0,
@@ -150,10 +154,30 @@ export class GameVisualFactory {
     body.setStrokeStyle(2, neonSunsetTheme.colors.playerCore, 0.75);
     trail.setOrigin(0.5, 0);
     shieldRing.setStrokeStyle(2, 0x7ee787, 0);
+    nose.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.78);
+    leftWing.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
+    rightWing.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
 
-    const container = this.scene.add.container(LANE_X[1], PLAYER_ANCHOR_Y, [trail, body, core, shieldRing, hitArea]);
+    const container = this.scene.add.container(LANE_X[1], PLAYER_ANCHOR_Y, [
+      trail,
+      leftWing,
+      rightWing,
+      body,
+      nose,
+      core,
+      shieldRing,
+      hitArea,
+    ]);
     container.setDepth(4);
-    return { container, body, core, trail, shieldRing, hitArea };
+    return {
+      container,
+      vehicleParts: [trail, leftWing, rightWing, body, nose, core],
+      body,
+      core,
+      trail,
+      shieldRing,
+      hitArea,
+    };
   }
 
   createLaneItem(item: LaneItem): MovingVisualItem {

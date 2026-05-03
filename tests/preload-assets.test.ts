@@ -10,7 +10,7 @@ describe('preloadGameAssets', () => {
     preloadGameAssets(scene);
 
     expect(image).toHaveBeenCalledTimes(getAllGameAssets().length);
-    expect(image).toHaveBeenCalledWith('player-seed', '/assets/game/player-seed.png');
+    expect(image).toHaveBeenCalledWith('player-hover-bike', '/assets/game/player-hover-bike.png');
     expect(image).toHaveBeenCalledWith('obstacle-hazard', '/assets/game/obstacle-hazard.png');
   });
 });

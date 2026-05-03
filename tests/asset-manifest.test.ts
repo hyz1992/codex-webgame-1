@@ -3,7 +3,8 @@ import { gameAssetManifest, getLaneItemAsset } from '../src/game/assets/assetMan
 
 describe('gameAssetManifest', () => {
   it('覆盖首批正式资产包要求的所有运行时图片', () => {
-    expect(gameAssetManifest.player.key).toBe('player-seed');
+    expect(gameAssetManifest.player.key).toBe('player-hover-bike');
+    expect(gameAssetManifest.player.path).toBe('/assets/game/player-hover-bike.png');
     expect(gameAssetManifest.backgrounds.map((asset) => asset.key)).toEqual(['bg-sunset-sky', 'bg-city-silhouette']);
     expect(gameAssetManifest.track.map((asset) => asset.key)).toEqual(['track-edge-glow', 'track-speed-grid']);
     expect(gameAssetManifest.items.map((asset) => asset.laneItemKind)).toEqual([

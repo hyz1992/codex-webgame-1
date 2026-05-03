@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const assetPaths = [
-  '/assets/game/player-seed.png',
+  '/assets/game/player-hover-bike.png',
   '/assets/game/bg-sunset-sky.png',
   '/assets/game/bg-city-silhouette.png',
   '/assets/game/track-edge-glow.png',

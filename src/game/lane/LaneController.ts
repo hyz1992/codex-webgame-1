@@ -1,7 +1,7 @@
 import type { GameAction } from '../actions';
 import { LANE_COUNT } from '../config';
 
-export type PlayerMotionState = 'running' | 'jumping' | 'sliding';
+export type PlayerMotionState = 'cruising';
 
 export interface LaneSnapshot {
   lane: number;
@@ -10,19 +10,9 @@ export interface LaneSnapshot {
 
 export class LaneController {
   private lane = 1;
-  private motion: PlayerMotionState = 'running';
+  private motion: PlayerMotionState = 'cruising';
 
   applyAction(action: GameAction): void {
-    if (action === 'jump') {
-      this.motion = 'jumping';
-      return;
-    }
-
-    if (action === 'slide') {
-      this.motion = 'sliding';
-      return;
-    }
-
     if (action === 'laneLeft') {
       this.moveLane(-1);
       return;
@@ -34,7 +24,7 @@ export class LaneController {
   }
 
   endActionState(): void {
-    this.motion = 'running';
+    this.motion = 'cruising';
   }
 
   snapshot(): LaneSnapshot {
@@ -45,10 +35,6 @@ export class LaneController {
   }
 
   private moveLane(direction: -1 | 1): void {
-    if (this.motion === 'sliding') {
-      return;
-    }
-
     this.lane = Math.max(0, Math.min(LANE_COUNT - 1, this.lane + direction));
   }
 }

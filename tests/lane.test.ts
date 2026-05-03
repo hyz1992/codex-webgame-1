@@ -15,16 +15,12 @@ describe('LaneController', () => {
     expect(lanes.snapshot().lane).toBe(2);
   });
 
-  it('跳跃时允许换轨，滑铲时禁止换轨', () => {
+  it('移除跳跃和下滑后始终保持巡航状态并允许变道', () => {
     const lanes = new LaneController();
 
-    lanes.applyAction('jump');
     lanes.applyAction('laneRight');
-    expect(lanes.snapshot().lane).toBe(2);
-
-    lanes.endActionState();
-    lanes.applyAction('slide');
     lanes.applyAction('laneLeft');
-    expect(lanes.snapshot().lane).toBe(2);
+
+    expect(lanes.snapshot()).toEqual({ lane: 1, motion: 'cruising' });
   });
 });

@@ -22,9 +22,9 @@ export interface LaneItemAssetDefinition extends GameAssetDefinition {
 
 export const gameAssetManifest = {
   player: {
-    key: 'player-seed',
-    path: '/assets/game/player-seed.png',
-    display: { width: 42, height: 64 },
+    key: 'player-hover-bike',
+    path: '/assets/game/player-hover-bike.png',
+    display: { width: 72, height: 46 },
     origin: { x: 0.5, y: 0.82 },
     kind: 'player',
   },

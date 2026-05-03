@@ -28,10 +28,6 @@ export function detectPointerGesture(start: PointerSample, end: PointerSample): 
     return dx < 0 ? 'laneLeft' : 'laneRight';
   }
 
-  if (absY > absX * GESTURE_AXIS_RATIO) {
-    return dy < 0 ? 'jump' : 'slide';
-  }
-
   return null;
 }
 
@@ -98,14 +94,6 @@ export function keyToAction(key: string): GameAction | null {
 
   if (key === 'd' || key === 'D' || key === 'ArrowRight') {
     return 'laneRight';
-  }
-
-  if (key === 'w' || key === 'W' || key === 'ArrowUp') {
-    return 'jump';
-  }
-
-  if (key === 's' || key === 'S' || key === 'ArrowDown') {
-    return 'slide';
   }
 
   if (key === 'Escape' || key === ' ' || key === 'Space' || key === 'Spacebar') {
