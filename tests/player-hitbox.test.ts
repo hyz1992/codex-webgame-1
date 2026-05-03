@@ -6,6 +6,6 @@ describe('player hitbox', () => {
     expect(neonSunsetTheme.player.height).toBeGreaterThan(neonSunsetTheme.player.width);
     expect(neonSunsetTheme.player.hitbox.width).toBeLessThan(neonSunsetTheme.player.width);
     expect(neonSunsetTheme.player.hitbox.height).toBeLessThan(neonSunsetTheme.player.height + neonSunsetTheme.player.trailLength);
-    expect(neonSunsetTheme.player.hitbox.height).toBeLessThanOrEqual(44);
+    expect(neonSunsetTheme.player.hitbox.height).toBeLessThanOrEqual(50);
   });
 });

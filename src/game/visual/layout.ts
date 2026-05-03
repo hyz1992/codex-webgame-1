@@ -1,10 +1,10 @@
 import { GAME_HEIGHT } from '../config';
 
 export const SCENE_ALIGNMENT_Y_OFFSET = -36;
-export const PLAYER_ANCHOR_Y = GAME_HEIGHT - 132;
-export const LANE_WORLD_SPACING_AT_NEAR = 144;
-export const TRACK_BOTTOM_EDGE_MULTIPLIER = 2.25;
-export const PROJECTED_NEAR_SCALE = 1.85;
+export const PLAYER_ANCHOR_Y = GAME_HEIGHT - 110;
+export const LANE_WORLD_SPACING_AT_NEAR = 176;
+export const TRACK_BOTTOM_EDGE_MULTIPLIER = 2.65;
+export const PROJECTED_NEAR_SCALE = 2.18;
 export const ITEM_VISUAL_SCALE = 1.2;
 export const ITEM_GROUND_SHADOW_ALPHA = 0.22;
 

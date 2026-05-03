@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT } from '../src/game/config';
 import { PerspectiveProjector } from '../src/game/visual/PerspectiveProjector';
+import { PLAYER_ANCHOR_Y } from '../src/game/visual/layout';
 
 describe('PerspectiveProjector', () => {
   it('远处轨道收束，近处轨道展开', () => {
@@ -32,6 +33,16 @@ describe('PerspectiveProjector', () => {
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThan(polygon.topRight.x - polygon.topLeft.x);
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThan(620);
     expect(polygon.topLeft.y).toBeLessThan(polygon.bottomLeft.y);
+  });
+
+  it('近景镜头让前景跑道更宽且主角更大', () => {
+    const projector = new PerspectiveProjector();
+    const playerAnchor = projector.projectLane(1, PLAYER_ANCHOR_Y);
+    const polygon = projector.trackPolygon();
+
+    expect(playerAnchor.scale).toBeGreaterThanOrEqual(1.55);
+    expect(playerAnchor.laneSpacing).toBeGreaterThanOrEqual(120);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThanOrEqual(900);
   });
 
   it('跑道从天边开始并在近端宽出屏幕边缘', () => {

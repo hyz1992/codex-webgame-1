@@ -24,7 +24,7 @@ export const gameAssetManifest = {
   player: {
     key: 'player-hover-bike',
     path: '/assets/game/player-hover-bike.png',
-    display: { width: 70, height: 58 },
+    display: { width: 82, height: 68 },
     origin: { x: 0.5, y: 0.82 },
     kind: 'player',
   },
