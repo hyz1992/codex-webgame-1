@@ -123,24 +123,26 @@ export class GameVisualFactory {
   createPlayer(): PlayerVisual {
     const trail = this.scene.add.rectangle(
       0,
-      16,
-      16,
+      22,
+      14,
       neonSunsetTheme.player.trailLength,
       neonSunsetTheme.colors.playerBody,
       0.24,
     );
+    const rearRing = this.scene.add.ellipse(0, 18, 48, 30, 0x020817, 0.82);
+    const frontRing = this.scene.add.ellipse(0, -30, 30, 18, 0x020817, 0.82);
     const body = this.scene.add.rectangle(
       0,
-      0,
-      neonSunsetTheme.player.width,
+      -4,
+      24,
       neonSunsetTheme.player.height,
       neonSunsetTheme.colors.playerBody,
-      1,
+      0.92,
     );
-    const nose = this.scene.add.triangle(0, -20, -18, 10, 18, 10, 0, -16, neonSunsetTheme.colors.playerCore, 0.9);
-    const core = this.scene.add.ellipse(0, -2, 24, 14, neonSunsetTheme.colors.playerCore, 1);
-    const leftWing = this.scene.add.triangle(-24, 2, 0, -8, -26, 8, -42, 18, neonSunsetTheme.colors.playerBody, 0.9);
-    const rightWing = this.scene.add.triangle(24, 2, 0, -8, 26, 8, 42, 18, neonSunsetTheme.colors.playerBody, 0.9);
+    const nose = this.scene.add.triangle(0, -36, -7, 6, 7, 6, 0, -10, neonSunsetTheme.colors.playerCore, 0.92);
+    const core = this.scene.add.ellipse(0, -8, 22, 16, neonSunsetTheme.colors.playerCore, 1);
+    const leftHandle = this.scene.add.rectangle(-28, 0, 24, 5, neonSunsetTheme.colors.playerBody, 0.88);
+    const rightHandle = this.scene.add.rectangle(28, 0, 24, 5, neonSunsetTheme.colors.playerBody, 0.88);
     const shieldRing = this.scene.add.circle(0, 0, 34, neonSunsetTheme.colors.playerBody, 0);
     const hitArea = this.scene.add.rectangle(
       0,
@@ -153,16 +155,20 @@ export class GameVisualFactory {
 
     body.setStrokeStyle(2, neonSunsetTheme.colors.playerCore, 0.75);
     trail.setOrigin(0.5, 0);
+    rearRing.setStrokeStyle(4, neonSunsetTheme.colors.laneCyan, 0.72);
+    frontRing.setStrokeStyle(3, neonSunsetTheme.colors.laneCyan, 0.68);
     shieldRing.setStrokeStyle(2, 0x7ee787, 0);
     nose.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.78);
-    leftWing.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
-    rightWing.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
+    leftHandle.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
+    rightHandle.setStrokeStyle(1, neonSunsetTheme.colors.laneCyan, 0.72);
 
     const container = this.scene.add.container(LANE_X[1], PLAYER_ANCHOR_Y, [
       trail,
-      leftWing,
-      rightWing,
+      rearRing,
+      frontRing,
       body,
+      leftHandle,
+      rightHandle,
       nose,
       core,
       shieldRing,
@@ -171,7 +177,7 @@ export class GameVisualFactory {
     container.setDepth(4);
     return {
       container,
-      vehicleParts: [trail, leftWing, rightWing, body, nose, core],
+      vehicleParts: [trail, rearRing, frontRing, body, leftHandle, rightHandle, nose, core],
       body,
       core,
       trail,

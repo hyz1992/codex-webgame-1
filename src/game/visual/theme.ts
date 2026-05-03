@@ -25,13 +25,13 @@ export const neonSunsetTheme = {
     speedLineAlpha: 0.34,
   },
   player: {
-    width: 68,
-    height: 36,
+    width: 54,
+    height: 58,
     radius: 12,
     trailLength: 66,
     hitbox: {
-      width: 44,
-      height: 30,
+      width: 34,
+      height: 42,
     },
   },
   motion: {
