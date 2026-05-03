@@ -3,7 +3,9 @@ import { GAME_HEIGHT } from '../src/game/config';
 import { PerspectiveProjector } from '../src/game/visual/PerspectiveProjector';
 import {
   MAIN_ROAD_EDGE_LANE_OFFSET,
+  OUTER_ROAD_EDGE_LANE_OFFSET,
   PLAYER_ANCHOR_Y,
+  ROAD_BUFFER_LANE_OFFSET,
   ROADSIDE_LAMP_LANE_OFFSET,
 } from '../src/game/visual/layout';
 
@@ -50,7 +52,7 @@ describe('PerspectiveProjector', () => {
     expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(playerAnchor.laneSpacing * 4.8);
   });
 
-  it('路灯和道路外缘一起位于主路外侧三分之一车道距离', () => {
+  it('三股主车道两侧保留三分之一车道宽的缓冲带', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
     const bottomLane = projector.projectLaneAtProgress(1, 1);
@@ -59,12 +61,32 @@ describe('PerspectiveProjector', () => {
     const leftLampLane = projector.projectLaneAtDistance(1, leftLamp.distance);
     const rightLampLane = projector.projectLaneAtDistance(1, rightLamp.distance);
 
-    expect(MAIN_ROAD_EDGE_LANE_OFFSET).toBe(1.5 + 1 / 3);
-    expect(ROADSIDE_LAMP_LANE_OFFSET).toBe(MAIN_ROAD_EDGE_LANE_OFFSET);
-    expect(polygon.bottomRight.x).toBeCloseTo(projector.centerX + bottomLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
-    expect(polygon.bottomLeft.x).toBeCloseTo(projector.centerX - bottomLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
+    expect(MAIN_ROAD_EDGE_LANE_OFFSET).toBe(1.5);
+    expect(ROAD_BUFFER_LANE_OFFSET).toBe(1 / 3);
+    expect(OUTER_ROAD_EDGE_LANE_OFFSET).toBe(MAIN_ROAD_EDGE_LANE_OFFSET + ROAD_BUFFER_LANE_OFFSET);
+    expect(ROADSIDE_LAMP_LANE_OFFSET).toBe(OUTER_ROAD_EDGE_LANE_OFFSET);
+    expect(polygon.bottomRight.x).toBeCloseTo(projector.centerX + bottomLane.laneSpacing * OUTER_ROAD_EDGE_LANE_OFFSET, 5);
+    expect(polygon.bottomLeft.x).toBeCloseTo(projector.centerX - bottomLane.laneSpacing * OUTER_ROAD_EDGE_LANE_OFFSET, 5);
     expect(leftLamp.x).toBeCloseTo(projector.centerX - leftLampLane.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET, 5);
     expect(rightLamp.x).toBeCloseTo(projector.centerX + rightLampLane.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET, 5);
+  });
+
+  it('投影出六条纵向道路参考线', () => {
+    const projector = new PerspectiveProjector();
+    const lineOffsets = [
+      -OUTER_ROAD_EDGE_LANE_OFFSET,
+      -MAIN_ROAD_EDGE_LANE_OFFSET,
+      -0.5,
+      0.5,
+      MAIN_ROAD_EDGE_LANE_OFFSET,
+      OUTER_ROAD_EDGE_LANE_OFFSET,
+    ];
+    const nearLineXs = lineOffsets.map((offset) => projector.trackEdgeX(offset, GAME_HEIGHT));
+
+    expect(lineOffsets).toHaveLength(6);
+    expect(new Set(lineOffsets).size).toBe(6);
+    expect(nearLineXs).toEqual([...nearLineXs].sort((a, b) => a - b));
+    expect(nearLineXs[1] - nearLineXs[0]).toBeCloseTo(nearLineXs[5] - nearLineXs[4], 5);
   });
 
   it('跑道从天边开始并在近端宽出屏幕边缘', () => {

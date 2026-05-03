@@ -7,6 +7,7 @@ import {
   ITEM_GROUND_SHADOW_ALPHA,
   ITEM_VISUAL_SCALE,
   MAIN_ROAD_EDGE_LANE_OFFSET,
+  OUTER_ROAD_EDGE_LANE_OFFSET,
   PLAYER_ANCHOR_Y,
   ROADSIDE_LAMP_LANE_OFFSET,
 } from './layout';
@@ -118,6 +119,10 @@ export class GameVisualFactory {
 
     for (const edge of [-MAIN_ROAD_EDGE_LANE_OFFSET, MAIN_ROAD_EDGE_LANE_OFFSET] as const) {
       this.strokeTrackCurve(graphics, edge, neonSunsetTheme.colors.lanePurple, 0.58, 4);
+    }
+
+    for (const edge of [-OUTER_ROAD_EDGE_LANE_OFFSET, OUTER_ROAD_EDGE_LANE_OFFSET] as const) {
+      this.strokeTrackCurve(graphics, edge, neonSunsetTheme.colors.laneCyan, 0.48, 3);
     }
 
     container.add(this.createHorizonMist());
