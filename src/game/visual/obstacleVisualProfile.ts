@@ -1,5 +1,6 @@
 import type { LaneItem } from '../spawn/patterns';
 
+// 障碍物视觉高度下限，避免细长障碍在远处过于不明显。
 export const MIN_OBSTACLE_VISUAL_HEIGHT = 52;
 
 export interface ObstacleVisualProfile {

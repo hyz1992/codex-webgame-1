@@ -44,8 +44,11 @@ export interface LaneDashVisual {
   roadProgress: number;
 }
 
+// 跑道远端淡入距离；越大淡入越长，越小越早完全显示。
 export const TRACK_FAR_FADE_PROGRESS = 0.13;
+// 跑道曲线采样段数，越高远端淡出越顺滑。
 export const TRACK_CURVE_SEGMENTS = 72;
+// 桥面主体透明度，线条会另外单独绘制。
 export const TRACK_SURFACE_ALPHA = 0.76;
 
 export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {

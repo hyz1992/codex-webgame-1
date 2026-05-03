@@ -22,10 +22,14 @@ import { playerRunPose } from '../visual/playerRunPose';
 import { neonSunsetTheme } from '../visual/theme';
 
 export const RUN_STATE_EVENT = 'run-state-change';
+// 调试碰撞框开关；打开后会显示主角和物件 hitbox。
 export const DEBUG_HITBOX_OVERLAY_ENABLED = false;
 const GAME_ACTION_EVENT = 'game-action';
+// 单侧路灯数量，越多远处越连续，但绘制对象也越多。
 const ROADSIDE_LAMP_COUNT = 32;
+// 每条车道虚线的循环段数，越多远端越不容易凭空出现。
 const LANE_DASH_COUNT = 42;
+// 单段车道虚线在道路世界中的长度。
 const LANE_DASH_LENGTH = 190;
 
 export class GameScene extends Phaser.Scene {

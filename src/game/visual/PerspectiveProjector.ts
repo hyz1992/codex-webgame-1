@@ -37,25 +37,43 @@ export interface RoadsideMarkerPoint extends TrackLanePoint {
 }
 
 export class PerspectiveProjector {
+  // 画面水平中心，所有车道投影都围绕它展开。
   readonly centerX = GAME_WIDTH / 2;
+  // 跑道远端所在的屏幕高度。
   readonly horizonY = TRACK_HORIZON_Y;
+  // 跑道近端会略超出屏幕底部，保证物件滑出时不突然消失。
   readonly bottomY = GAME_HEIGHT + 28;
+  // 伪 3D 相机计算使用的半屏高度。
   readonly viewportHalfHeight = GAME_HEIGHT / 2;
+  // 垂直视场角，越大透视越夸张。
   readonly verticalFovRadians = (56 * Math.PI) / 180;
+  // 由视场角推导出的焦距，控制近大远小的强度。
   readonly focalLength = this.viewportHalfHeight / Math.tan(this.verticalFovRadians / 2);
+  // 玩家附近的参考世界距离，越小近处透视越强。
   readonly nearDistance = 420;
+  // 相机离道路平面的虚拟高度。
   readonly cameraHeight = ((this.bottomY - this.horizonY) * this.nearDistance) / this.focalLength;
+  // 单车道世界宽度，最终会按距离投影成屏幕像素。
   readonly laneWorldSpacing = (LANE_WORLD_SPACING_AT_NEAR * this.nearDistance) / this.focalLength;
+  // 近处物件缩放基准。
   readonly nearScale = PROJECTED_NEAR_SCALE;
+  // 物件离开屏幕底部后的进度，保证继续滑出而不是贴边消失。
   readonly exitProgress = 1.18;
+  // 障碍物和拾取物生成进度，比道路尽头更近，避免太小看不清。
   readonly spawnProgress = 0.075;
+  // 路灯和车道虚线的生成进度，需要更靠近远端以避免凭空出现。
   readonly markerSpawnProgress = Math.max(ROAD_REFERENCE_FAR_PROGRESS, TRACK_VISUAL_HORIZON_PROGRESS);
+  // 物件离开屏幕时对应的世界距离。
   readonly nearExitDistance = this.progressToDistance(this.exitProgress);
+  // 障碍物和拾取物生成时对应的世界距离。
   readonly spawnDistance = this.progressToDistance(this.spawnProgress);
+  // 路灯和车道虚线循环时对应的最远世界距离。
   readonly markerSpawnDistance = this.progressToDistance(this.markerSpawnProgress);
+  // 屏幕像素速度到道路世界距离的换算比例。
   readonly worldDistancePerScreenPixel =
     (this.spawnDistance - this.nearExitDistance) /
     ((this.exitProgress - this.spawnProgress) * (this.bottomY - this.horizonY));
+  // 障碍物初次出现时的屏幕 y 坐标。
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {

@@ -1,5 +1,8 @@
+// 普通行驶时主角上下浮动幅度，单位像素。
 export const PLAYER_RUN_BOB_PIXELS = 4;
+// 加速时主角上下浮动幅度，略大一点增强速度感。
 export const PLAYER_BOOST_BOB_PIXELS = 6;
+// 一次上下浮动循环的时长，单位毫秒。
 export const PLAYER_RUN_CYCLE_MS = 420;
 
 export type PlayerRunMotion = 'cruising';

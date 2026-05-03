@@ -9,6 +9,11 @@ import {
   MAX_SPEED,
 } from './config';
 
+// 距离越远速度越快；这个系数控制速度成长斜率。
+const SPEED_GAIN_PER_DISTANCE = 0.35;
+// 每吃到一个能量块增加的加速能量。
+const ENERGY_BOOST_GAIN = 20;
+
 export type DamageKind = 'normal' | 'fatal';
 
 export interface RunState {
@@ -65,7 +70,7 @@ export function addDistance(state: RunState, distanceDelta: number): RunState {
   }
 
   const nextDistance = state.distance + distanceDelta;
-  const speed = Math.min(MAX_SPEED, BASE_SPEED + nextDistance * 0.35);
+  const speed = Math.min(MAX_SPEED, BASE_SPEED + nextDistance * SPEED_GAIN_PER_DISTANCE);
 
   return {
     ...state,
@@ -83,7 +88,7 @@ export function collectEnergy(state: RunState): RunState {
   const combo = state.combo + 1;
   const bestCombo = Math.max(state.bestCombo, combo);
   const score = state.score + ENERGY_SCORE + combo;
-  const boostMeter = state.boostMeter + 20;
+  const boostMeter = state.boostMeter + ENERGY_BOOST_GAIN;
 
   if (boostMeter >= BOOST_METER_MAX) {
     return {
