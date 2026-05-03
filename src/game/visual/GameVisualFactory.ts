@@ -29,6 +29,13 @@ export interface RoadsideLampVisual {
   roadProgress: number;
 }
 
+export interface LaneDashVisual {
+  line: Phaser.GameObjects.Line;
+  edge: -0.5 | 0.5;
+  roadDistance: number;
+  roadProgress: number;
+}
+
 export const TRACK_FAR_FADE_PROGRESS = 0.18;
 
 export const TRACK_HORIZON_MIST = {
@@ -102,28 +109,8 @@ export class GameVisualFactory {
     graphics.lineBetween(polygon.topRight.x, polygon.topRight.y, polygon.bottomRight.x, polygon.bottomRight.y);
     container.add(graphics);
 
-    for (let progress = 0.14; progress < 1; progress += 0.085) {
-      const projected = this.projector.projectLaneAtProgress(1, progress);
-      const left = this.projector.trackEdgeX(-1.45, projected.y);
-      const right = this.projector.trackEdgeX(1.45, projected.y);
-      const alpha = trackFarFadeAlpha(progress, neonSunsetTheme.track.gridAlpha);
-      const grid = this.scene.add.line(
-        0,
-        0,
-        left,
-        projected.y,
-        right,
-        projected.y,
-        neonSunsetTheme.colors.laneCyan,
-        alpha,
-      );
-      grid.setOrigin(0, 0);
-      container.add(grid);
-    }
-
-    for (const edge of [-1.5, -0.5, 0.5, 1.5] as const) {
-      const color = Math.abs(edge) === 1.5 ? neonSunsetTheme.colors.lanePurple : neonSunsetTheme.colors.laneCyan;
-      this.strokeTrackCurve(graphics, edge, color, Math.abs(edge) === 1.5 ? 0.58 : 0.46, Math.abs(edge) === 1.5 ? 4 : 2);
+    for (const edge of [-1.5, 1.5] as const) {
+      this.strokeTrackCurve(graphics, edge, neonSunsetTheme.colors.lanePurple, 0.58, 4);
     }
 
     container.add(this.createHorizonMist());
@@ -250,6 +237,14 @@ export class GameVisualFactory {
     lamp.setScale(projected.scale);
     lamp.setAlpha(trackFarFadeAlpha(roadProgress, 0.85));
     return { container: lamp, side, roadDistance, roadProgress };
+  }
+
+  createLaneDash(edge: -0.5 | 0.5, roadDistance: number): LaneDashVisual {
+    const roadProgress = this.projector.distanceToProgress(roadDistance);
+    const line = this.scene.add.line(0, 0, 0, 0, 0, 1, neonSunsetTheme.colors.laneCyan, 0.62);
+    line.setOrigin(0, 0);
+    line.setDepth(2.4);
+    return { line, edge, roadDistance, roadProgress };
   }
 
   private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {

@@ -8,7 +8,13 @@ import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
 import { resolvePlayerCollision } from '../collision/CollisionSystem';
 import { AssetVisualFactory } from '../visual/AssetVisualFactory';
 import { EffectController } from '../visual/EffectController';
-import { GameVisualFactory, type MovingVisualItem, type PlayerVisual, type RoadsideLampVisual } from '../visual/GameVisualFactory';
+import {
+  GameVisualFactory,
+  type LaneDashVisual,
+  type MovingVisualItem,
+  type PlayerVisual,
+  type RoadsideLampVisual,
+} from '../visual/GameVisualFactory';
 import { ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
 import { playerRunPose } from '../visual/playerRunPose';
@@ -30,6 +36,7 @@ export class GameScene extends Phaser.Scene {
   private spawner = new ObstacleSpawner(1);
   private items: MovingVisualItem[] = [];
   private roadsideLamps: RoadsideLampVisual[] = [];
+  private laneDashes: LaneDashVisual[] = [];
   private elapsedMs = 0;
   private spawnTimerMs = 0;
   private motionStartedMs = 0;
@@ -48,6 +55,7 @@ export class GameScene extends Phaser.Scene {
     this.assetVisualFactory = new AssetVisualFactory(this, this.visualFactory);
     this.assetVisualFactory.createBackground();
     this.assetVisualFactory.createTrack();
+    this.laneDashes = this.createLaneDashes();
     this.roadsideLamps = this.createRoadsideLamps();
     this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
@@ -64,6 +72,7 @@ export class GameScene extends Phaser.Scene {
     this.spawner = new ObstacleSpawner(1);
     this.items = [];
     this.roadsideLamps = [];
+    this.laneDashes = [];
     this.elapsedMs = 0;
     this.spawnTimerMs = 0;
     this.motionStartedMs = 0;
@@ -95,6 +104,7 @@ export class GameScene extends Phaser.Scene {
 
     this.syncPlayerPosition();
     this.moveItems(deltaMs);
+    this.moveLaneDashes(deltaMs);
     this.moveRoadsideLamps(deltaMs);
     this.effects.updateBoost(this.runState.isBoosting);
     this.drawDebugHitboxes();
@@ -208,6 +218,32 @@ export class GameScene extends Phaser.Scene {
     return lamps;
   }
 
+  private createLaneDashes(): LaneDashVisual[] {
+    const dashes: LaneDashVisual[] = [];
+
+    for (const edge of [-0.5, 0.5] as const) {
+      for (const point of this.projector.laneDashMarkerPoints(edge, 12)) {
+        const dash = this.visualFactory.createLaneDash(edge, point.distance);
+        this.projectLaneDash(dash);
+        dashes.push(dash);
+      }
+    }
+
+    return dashes;
+  }
+
+  private moveLaneDashes(deltaMs: number): void {
+    const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
+    const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
+    const travelDistance = this.projector.roadTravelDistanceForPixels(pixels);
+
+    for (const dash of this.laneDashes) {
+      dash.roadDistance = this.projector.advanceRoadDistance(dash.roadDistance, travelDistance);
+      dash.roadProgress = this.projector.distanceToProgress(dash.roadDistance);
+      this.projectLaneDash(dash);
+    }
+  }
+
   private moveRoadsideLamps(deltaMs: number): void {
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
@@ -255,6 +291,21 @@ export class GameScene extends Phaser.Scene {
     lamp.container.setScale(projected.scale);
     lamp.container.setAlpha(projected.alpha * 0.85);
     lamp.container.setDepth(2 + lamp.roadProgress * 4);
+  }
+
+  private projectLaneDash(dash: LaneDashVisual): void {
+    const dashLength = 190;
+    const far = this.projector.projectLaneAtDistance(1, dash.roadDistance);
+    const nearDistance = Math.max(this.projector.nearExitDistance, dash.roadDistance - dashLength);
+    const near = this.projector.projectLaneAtDistance(1, nearDistance);
+    const farX = this.projector.centerX + dash.edge * far.laneSpacing;
+    const nearX = this.projector.centerX + dash.edge * near.laneSpacing;
+    const alpha = Math.min(far.alpha, near.alpha) * 0.68;
+
+    dash.roadProgress = this.projector.distanceToProgress(dash.roadDistance);
+    dash.line.setTo(farX, far.y, nearX, near.y);
+    dash.line.setStrokeStyle(3, neonSunsetTheme.colors.laneCyan, alpha);
+    dash.line.setDepth(2.2 + dash.roadProgress * 2);
   }
 
   private drawDebugHitboxes(): void {

@@ -120,6 +120,14 @@ export class PerspectiveProjector {
   }
 
   roadsideMarkerPoints(side: -1 | 1, count: number): RoadsideMarkerPoint[] {
+    return this.distanceMarkerPoints(side * 1.72, count);
+  }
+
+  laneDashMarkerPoints(edge: -0.5 | 0.5, count: number): RoadsideMarkerPoint[] {
+    return this.distanceMarkerPoints(edge, count);
+  }
+
+  private distanceMarkerPoints(edge: number, count: number): RoadsideMarkerPoint[] {
     const points: RoadsideMarkerPoint[] = [];
     const total = Math.max(1, count);
     const spacing = (this.spawnDistance - this.nearExitDistance) / total;
@@ -131,7 +139,7 @@ export class PerspectiveProjector {
       points.push({
         progress,
         distance,
-        x: this.centerX + side * projected.laneSpacing * 1.72,
+        x: this.centerX + edge * projected.laneSpacing,
         y: projected.y,
         scale: projected.scale,
       });

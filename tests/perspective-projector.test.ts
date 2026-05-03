@@ -177,4 +177,22 @@ describe('PerspectiveProjector', () => {
       expect(gap).toBeCloseTo(expectedGap, 5);
     }
   });
+
+  it('places lane dash markers on lane separators with stable world spacing', () => {
+    const projector = new PerspectiveProjector();
+    const leftSeparator = projector.laneDashMarkerPoints(-0.5, 10);
+    const rightSeparator = projector.laneDashMarkerPoints(0.5, 10);
+    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / leftSeparator.length;
+    const gaps = leftSeparator.slice(1).map((point, index) => leftSeparator[index].distance - point.distance);
+
+    expect(leftSeparator).toHaveLength(10);
+    expect(rightSeparator).toHaveLength(10);
+    expect(leftSeparator[0].x).toBeLessThan(projector.centerX);
+    expect(rightSeparator[0].x).toBeGreaterThan(projector.centerX);
+    expect(leftSeparator[0].y).toBe(rightSeparator[0].y);
+
+    for (const gap of gaps) {
+      expect(gap).toBeCloseTo(expectedGap, 5);
+    }
+  });
 });
