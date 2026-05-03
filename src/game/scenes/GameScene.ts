@@ -305,7 +305,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const animationKey = this.runState.isBoosting ? playerAnimationKeys.boost : playerAnimationKeys.idle;
+    const animationKey = this.runState.hasStarted ? playerAnimationKeys.boost : playerAnimationKeys.idle;
     if (currentKey !== animationKey || !sprite.anims.isPlaying) {
       sprite.play(animationKey, true);
     }
