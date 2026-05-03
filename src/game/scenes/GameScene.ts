@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT } from '../config';
 import type { GameAction } from '../actions';
 import { preloadGameAssets } from '../assets/preloadGameAssets';
+import { playerAnimationKeys } from '../assets/assetManifest';
 import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
 import { ObstacleSpawner } from '../spawn/ObstacleSpawner';
@@ -148,6 +149,7 @@ export class GameScene extends Phaser.Scene {
     this.laneController.applyAction(action);
     const afterLane = this.laneController.snapshot().lane;
     if (afterLane !== beforeLane) {
+      this.playPlayerLaneChangeAnimation(action);
       this.effects.playLaneChange(this.player, afterLane);
     }
   }
@@ -277,6 +279,36 @@ export class GameScene extends Phaser.Scene {
     this.player.container.y = projected.y + pose.yOffset;
     this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale);
     this.player.container.setDepth(6);
+    this.playPlayerCruiseAnimation();
+  }
+
+  private playPlayerLaneChangeAnimation(action: GameAction): void {
+    if (!this.player.sprite) {
+      return;
+    }
+
+    const animationKey = action === 'laneLeft' ? playerAnimationKeys.laneLeft : playerAnimationKeys.laneRight;
+    this.player.sprite.play(animationKey, true);
+    this.player.sprite.once('animationcomplete', () => this.playPlayerCruiseAnimation());
+  }
+
+  private playPlayerCruiseAnimation(): void {
+    const sprite = this.player.sprite;
+    if (!sprite) {
+      return;
+    }
+
+    const currentKey = sprite.anims.currentAnim?.key;
+    const isLaneChanging =
+      sprite.anims.isPlaying && (currentKey === playerAnimationKeys.laneLeft || currentKey === playerAnimationKeys.laneRight);
+    if (isLaneChanging) {
+      return;
+    }
+
+    const animationKey = this.runState.isBoosting ? playerAnimationKeys.boost : playerAnimationKeys.idle;
+    if (currentKey !== animationKey || !sprite.anims.isPlaying) {
+      sprite.play(animationKey, true);
+    }
   }
 
   private projectMovingItem(item: MovingVisualItem): void {

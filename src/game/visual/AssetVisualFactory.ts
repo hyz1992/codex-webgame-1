@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { gameAssetManifest, getLaneItemAsset } from '../assets/assetManifest';
+import { gameAssetManifest, getLaneItemAsset, playerAnimationFrames, playerAnimationKeys } from '../assets/assetManifest';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
@@ -48,12 +48,18 @@ export class AssetVisualFactory {
     for (const part of fallbackPlayer.vehicleParts) {
       part.setVisible(false);
     }
-    const sprite = this.scene.add.image(0, 0, gameAssetManifest.player.key);
+    this.ensurePlayerAnimations();
+    const sprite = this.scene.add.sprite(0, 0, gameAssetManifest.player.key, playerAnimationFrames.idle.start);
     sprite.setDisplaySize(gameAssetManifest.player.display.width, gameAssetManifest.player.display.height);
     sprite.setOrigin(gameAssetManifest.player.origin.x, gameAssetManifest.player.origin.y);
+    sprite.play(playerAnimationKeys.idle);
     fallbackPlayer.container.add(sprite);
     fallbackPlayer.container.bringToTop(sprite);
-    return fallbackPlayer;
+    return {
+      ...fallbackPlayer,
+      vehicleParts: [...fallbackPlayer.vehicleParts, sprite],
+      sprite,
+    };
   }
 
   createLaneItem(item: LaneItem): MovingVisualItem {
@@ -86,5 +92,24 @@ export class AssetVisualFactory {
 
   private hasTexture(key: string): boolean {
     return this.scene.textures.exists(key);
+  }
+
+  private ensurePlayerAnimations(): void {
+    for (const [name, frames] of Object.entries(playerAnimationFrames)) {
+      const key = playerAnimationKeys[name as keyof typeof playerAnimationKeys];
+      if (this.scene.anims.exists(key)) {
+        continue;
+      }
+
+      this.scene.anims.create({
+        key,
+        frames: this.scene.anims.generateFrameNumbers(gameAssetManifest.player.key, {
+          start: frames.start,
+          end: frames.end,
+        }),
+        frameRate: frames.frameRate,
+        repeat: frames.repeat,
+      });
+    }
   }
 }

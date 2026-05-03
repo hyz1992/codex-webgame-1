@@ -82,7 +82,7 @@ export class EffectController {
   playImpact(player: PlayerVisual): void {
     this.scene.cameras.main.shake(neonSunsetTheme.motion.impactShakeMs, 0.006);
     this.scene.tweens.add({
-      targets: player.core,
+      targets: player.sprite ?? player.core,
       alpha: 0.2,
       duration: 55,
       yoyo: true,

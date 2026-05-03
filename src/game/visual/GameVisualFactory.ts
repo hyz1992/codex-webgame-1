@@ -21,6 +21,7 @@ export interface PlayerVisual {
   trail: Phaser.GameObjects.Rectangle;
   shieldRing: Phaser.GameObjects.Arc;
   hitArea: Phaser.GameObjects.Rectangle;
+  sprite?: Phaser.GameObjects.Sprite;
 }
 
 export interface MovingVisualItem extends LaneItem {

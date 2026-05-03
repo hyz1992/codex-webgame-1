@@ -13,6 +13,10 @@ export interface GameAssetDefinition {
     x: number;
     y: number;
   };
+  frame?: {
+    width: number;
+    height: number;
+  };
   kind: GameAssetKind;
 }
 
@@ -23,9 +27,10 @@ export interface LaneItemAssetDefinition extends GameAssetDefinition {
 export const gameAssetManifest = {
   player: {
     key: 'player-hover-bike',
-    path: '/assets/game/player-hover-bike.png',
-    display: { width: 90, height: 74 },
-    origin: { x: 0.5, y: 0.82 },
+    path: '/assets/game/player-hover-bike-sheet.png',
+    display: { width: 128, height: 160 },
+    origin: { x: 0.5, y: 0.86 },
+    frame: { width: 192, height: 240 },
     kind: 'player',
   },
   backgrounds: [
@@ -126,6 +131,20 @@ export const gameAssetManifest = {
 };
 
 export type GameAssetManifest = typeof gameAssetManifest;
+
+export const playerAnimationKeys = {
+  idle: 'player-hover-bike-idle',
+  boost: 'player-hover-bike-boost',
+  laneLeft: 'player-hover-bike-lane-left',
+  laneRight: 'player-hover-bike-lane-right',
+} as const;
+
+export const playerAnimationFrames = {
+  idle: { start: 0, end: 4, frameRate: 7, repeat: -1 },
+  boost: { start: 5, end: 12, frameRate: 14, repeat: -1 },
+  laneLeft: { start: 13, end: 22, frameRate: 18, repeat: 0 },
+  laneRight: { start: 23, end: 32, frameRate: 18, repeat: 0 },
+} as const;
 
 export function getAllGameAssets(): GameAssetDefinition[] {
   return [
