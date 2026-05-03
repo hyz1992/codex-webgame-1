@@ -7,6 +7,7 @@ import {
   PLAYER_ANCHOR_Y,
   ROAD_BUFFER_LANE_OFFSET,
   ROADSIDE_LAMP_LANE_OFFSET,
+  TRACK_VISUAL_HORIZON_PROGRESS,
 } from '../src/game/visual/layout';
 
 describe('PerspectiveProjector', () => {
@@ -110,14 +111,19 @@ describe('PerspectiveProjector', () => {
     expect(spawn.scale).toBeLessThan(0.45);
   });
 
-  it('track edges collapse exactly into the vanishing point at the horizon', () => {
+  it('跑道远端保留一点梯形轮廓而不是完全尖角', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
+    const topWidth = polygon.topRight.x - polygon.topLeft.x;
+    const visualHorizonLane = projector.projectLaneAtProgress(1, TRACK_VISUAL_HORIZON_PROGRESS);
 
-    expect(polygon.topLeft.x).toBe(projector.centerX);
-    expect(polygon.topRight.x).toBe(projector.centerX);
-    expect(projector.trackEdgeX(-1.5, projector.horizonY)).toBe(projector.centerX);
-    expect(projector.trackEdgeX(1.5, projector.horizonY)).toBe(projector.centerX);
+    expect(topWidth).toBeGreaterThanOrEqual(32);
+    expect(topWidth).toBeLessThanOrEqual(48);
+    expect(polygon.topLeft.x).toBeLessThan(projector.centerX);
+    expect(polygon.topRight.x).toBeGreaterThan(projector.centerX);
+    expect(projector.trackEdgeX(-OUTER_ROAD_EDGE_LANE_OFFSET, projector.horizonY)).toBeCloseTo(polygon.topLeft.x, 5);
+    expect(projector.trackEdgeX(OUTER_ROAD_EDGE_LANE_OFFSET, projector.horizonY)).toBeCloseTo(polygon.topRight.x, 5);
+    expect(visualHorizonLane.y).toBeGreaterThan(projector.horizonY);
   });
 
   it('side lane objects spawn near the track end and then diverge along fixed lanes', () => {
@@ -155,9 +161,14 @@ describe('PerspectiveProjector', () => {
     const laneGuide = projector.trackLanePoints(-1, 8);
 
     for (const point of laneGuide) {
-      const object = projector.projectLaneAtProgress(0, point.progress);
+      const visualProgress = Math.max(TRACK_VISUAL_HORIZON_PROGRESS, point.progress);
+      const object = projector.projectLaneAtProgress(0, visualProgress);
       expect(object.x).toBeCloseTo(point.x, 5);
-      expect(object.y).toBeCloseTo(point.y, 5);
+      if (point.progress === 0) {
+        expect(point.y).toBe(projector.horizonY);
+      } else {
+        expect(object.y).toBeCloseTo(point.y, 5);
+      }
     }
   });
 

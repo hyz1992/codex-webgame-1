@@ -5,6 +5,7 @@ import {
   ROADSIDE_LAMP_LANE_OFFSET,
   TRACK_BOTTOM_EDGE_MULTIPLIER,
   TRACK_HORIZON_Y,
+  TRACK_VISUAL_HORIZON_PROGRESS,
 } from './layout';
 
 export interface ProjectedLanePoint {
@@ -92,19 +93,19 @@ export class PerspectiveProjector {
   }
 
   trackPolygon(): TrackPolygon {
-    const top = this.projectLane(1, this.horizonY);
+    const top = this.projectLaneAtProgress(1, TRACK_VISUAL_HORIZON_PROGRESS);
     const bottom = this.projectLane(1, this.bottomY);
 
     return {
-      topLeft: { x: this.centerX - top.laneSpacing, y: this.horizonY },
-      topRight: { x: this.centerX + top.laneSpacing, y: this.horizonY },
+      topLeft: { x: this.centerX - top.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.horizonY },
+      topRight: { x: this.centerX + top.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.horizonY },
       bottomRight: { x: this.centerX + bottom.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.bottomY },
       bottomLeft: { x: this.centerX - bottom.laneSpacing * TRACK_BOTTOM_EDGE_MULTIPLIER, y: this.bottomY },
     };
   }
 
   trackEdgeX(edge: number, y: number): number {
-    const projected = this.projectLaneAtProgress(1, this.normalizedDepth(y));
+    const projected = this.projectLaneAtProgress(1, this.visualTrackProgress(this.normalizedDepth(y)));
     return this.centerX + edge * projected.laneSpacing;
   }
 
@@ -114,11 +115,11 @@ export class PerspectiveProjector {
 
     for (let index = 0; index <= steps; index += 1) {
       const progress = index / steps;
-      const projected = this.projectLaneAtProgress(1, progress);
+      const projected = this.projectLaneAtProgress(1, this.visualTrackProgress(progress));
       points.push({
         progress,
         x: this.centerX + edge * projected.laneSpacing,
-        y: projected.y,
+        y: progress === 0 ? this.horizonY : projected.y,
       });
     }
 
@@ -175,6 +176,10 @@ export class PerspectiveProjector {
 
   private clamp01(value: number): number {
     return Math.max(0, Math.min(1, value));
+  }
+
+  private visualTrackProgress(progress: number): number {
+    return Math.max(TRACK_VISUAL_HORIZON_PROGRESS, progress);
   }
 
   private lerp(from: number, to: number, t: number): number {
