@@ -45,6 +45,7 @@ export interface LaneDashVisual {
 }
 
 export const TRACK_FAR_FADE_PROGRESS = 0.18;
+export const TRACK_CURVE_SEGMENTS = 72;
 
 export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {
   if (progress <= 0) {
@@ -55,7 +56,9 @@ export function trackFarFadeAlpha(progress: number, baseAlpha: number): number {
     return baseAlpha;
   }
 
-  return baseAlpha * (progress / TRACK_FAR_FADE_PROGRESS);
+  const ratio = progress / TRACK_FAR_FADE_PROGRESS;
+  const smoothRatio = ratio * ratio * (3 - 2 * ratio);
+  return baseAlpha * smoothRatio;
 }
 
 export class GameVisualFactory {
@@ -275,7 +278,7 @@ export class GameVisualFactory {
   }
 
   private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {
-    const points = this.projector.trackLanePoints(edge, 18);
+    const points = this.projector.trackLanePoints(edge, TRACK_CURVE_SEGMENTS);
     for (let index = 1; index < points.length; index += 1) {
       const previous = points[index - 1];
       const point = points[index];

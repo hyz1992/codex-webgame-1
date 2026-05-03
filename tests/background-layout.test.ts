@@ -9,7 +9,7 @@ import {
   SUNSET_BACKGROUND_Y_OFFSET,
   TRACK_HORIZON_Y,
 } from '../src/game/visual/layout';
-import { trackFarFadeAlpha } from '../src/game/visual/GameVisualFactory';
+import { TRACK_CURVE_SEGMENTS, trackFarFadeAlpha } from '../src/game/visual/GameVisualFactory';
 
 describe('background layout', () => {
   it('keeps the city layer above its original base position', () => {
@@ -33,9 +33,17 @@ describe('background layout', () => {
 
   it('softens the bridge vanishing point by fading far track lines only', () => {
     expect(trackFarFadeAlpha(0, 0.58)).toBe(0);
+    expect(trackFarFadeAlpha(0.04, 0.58)).toBeLessThan(0.58 * (0.04 / 0.18));
     expect(trackFarFadeAlpha(0.08, 0.58)).toBeLessThan(0.58);
     expect(trackFarFadeAlpha(0.2, 0.58)).toBe(0.58);
     expect(readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8')).not.toContain('createHorizonMist');
+  });
+
+  it('uses dense curve sampling so far track fade does not look segmented', () => {
+    const factorySource = readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8');
+
+    expect(TRACK_CURVE_SEGMENTS).toBeGreaterThanOrEqual(72);
+    expect(factorySource).toContain('trackLanePoints(edge, TRACK_CURVE_SEGMENTS)');
   });
 
   it('renders the opened track horizon as a trapezoid without duplicate outer edge strokes', () => {
