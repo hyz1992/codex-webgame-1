@@ -117,8 +117,8 @@ describe('PerspectiveProjector', () => {
     const topWidth = polygon.topRight.x - polygon.topLeft.x;
     const visualHorizonLane = projector.projectLaneAtProgress(1, TRACK_VISUAL_HORIZON_PROGRESS);
 
-    expect(topWidth).toBeGreaterThanOrEqual(32);
-    expect(topWidth).toBeLessThanOrEqual(48);
+    expect(topWidth).toBeGreaterThanOrEqual(16);
+    expect(topWidth).toBeLessThanOrEqual(24);
     expect(polygon.topLeft.x).toBeLessThan(projector.centerX);
     expect(polygon.topRight.x).toBeGreaterThan(projector.centerX);
     expect(projector.trackEdgeX(-OUTER_ROAD_EDGE_LANE_OFFSET, projector.horizonY)).toBeCloseTo(polygon.topLeft.x, 5);

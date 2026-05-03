@@ -37,4 +37,14 @@ describe('background layout', () => {
     expect(trackFarFadeAlpha(0.2, 0.58)).toBe(0.58);
     expect(TRACK_HORIZON_MIST.height).toBeGreaterThanOrEqual(48);
   });
+
+  it('renders the opened track horizon as a trapezoid without duplicate outer edge strokes', () => {
+    const factorySource = readFileSync('src/game/visual/GameVisualFactory.ts', 'utf8');
+
+    expect(factorySource).toContain(
+      'graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true)',
+    );
+    expect(factorySource).not.toContain('graphics.lineBetween(polygon.topLeft.x');
+    expect(factorySource).not.toContain('graphics.lineBetween(polygon.topRight.x');
+  });
 });

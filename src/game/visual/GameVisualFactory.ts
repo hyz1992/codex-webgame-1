@@ -111,10 +111,7 @@ export class GameVisualFactory {
     const polygon = this.projector.trackPolygon();
 
     graphics.fillStyle(neonSunsetTheme.colors.track, 0.76);
-    graphics.fillPoints([polygon.topLeft, polygon.bottomRight, polygon.bottomLeft], true);
-    graphics.lineStyle(2, neonSunsetTheme.colors.laneCyan, 0.34);
-    graphics.lineBetween(polygon.topLeft.x, polygon.topLeft.y, polygon.bottomLeft.x, polygon.bottomLeft.y);
-    graphics.lineBetween(polygon.topRight.x, polygon.topRight.y, polygon.bottomRight.x, polygon.bottomRight.y);
+    graphics.fillPoints([polygon.topLeft, polygon.topRight, polygon.bottomRight, polygon.bottomLeft], true);
     container.add(graphics);
 
     for (const edge of [-MAIN_ROAD_EDGE_LANE_OFFSET, MAIN_ROAD_EDGE_LANE_OFFSET] as const) {
