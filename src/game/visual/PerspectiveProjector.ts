@@ -179,7 +179,7 @@ export class PerspectiveProjector {
   }
 
   private visualTrackProgress(progress: number): number {
-    return Math.max(TRACK_VISUAL_HORIZON_PROGRESS, progress);
+    return TRACK_VISUAL_HORIZON_PROGRESS + (1 - TRACK_VISUAL_HORIZON_PROGRESS) * progress;
   }
 
   private lerp(from: number, to: number, t: number): number {

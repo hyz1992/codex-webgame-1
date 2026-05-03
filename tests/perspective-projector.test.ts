@@ -90,6 +90,17 @@ describe('PerspectiveProjector', () => {
     expect(nearLineXs[1] - nearLineXs[0]).toBeCloseTo(nearLineXs[5] - nearLineXs[4], 5);
   });
 
+  it('跑道远端采样从梯形口连续展开，不产生竖直凸帽', () => {
+    const projector = new PerspectiveProjector();
+    const rightEdge = projector.trackLanePoints(OUTER_ROAD_EDGE_LANE_OFFSET, 72);
+    const leftEdge = projector.trackLanePoints(-OUTER_ROAD_EDGE_LANE_OFFSET, 72);
+
+    expect(rightEdge[0].y).toBe(projector.horizonY);
+    expect(rightEdge[1].y).toBeGreaterThan(rightEdge[0].y);
+    expect(rightEdge[1].x).toBeGreaterThan(rightEdge[0].x);
+    expect(leftEdge[1].x).toBeLessThan(leftEdge[0].x);
+  });
+
   it('跑道从天边开始并在近端宽出屏幕边缘', () => {
     const projector = new PerspectiveProjector();
     const polygon = projector.trackPolygon();
@@ -161,7 +172,7 @@ describe('PerspectiveProjector', () => {
     const laneGuide = projector.trackLanePoints(-1, 8);
 
     for (const point of laneGuide) {
-      const visualProgress = Math.max(TRACK_VISUAL_HORIZON_PROGRESS, point.progress);
+      const visualProgress = TRACK_VISUAL_HORIZON_PROGRESS + (1 - TRACK_VISUAL_HORIZON_PROGRESS) * point.progress;
       const object = projector.projectLaneAtProgress(0, visualProgress);
       expect(object.x).toBeCloseTo(point.x, 5);
       if (point.progress === 0) {
