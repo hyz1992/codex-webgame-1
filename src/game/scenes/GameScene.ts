@@ -159,12 +159,11 @@ export class GameScene extends Phaser.Scene {
     const playerMotion = this.laneController.snapshot().motion;
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
+    const travelDistance = this.projector.roadTravelDistanceForPixels(pixels);
 
     for (const item of this.items) {
-      const progressDelta =
-        (pixels / (this.projector.bottomY - this.projector.horizonY)) *
-        this.projector.movementRateAtProgress(item.roadProgress);
-      item.roadProgress += progressDelta;
+      item.roadDistance -= travelDistance;
+      item.roadProgress = this.projector.distanceToProgress(item.roadDistance);
       this.projectMovingItem(item);
 
       if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, item.hitArea.getBounds())) {
@@ -187,7 +186,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.items = this.items.filter((item) => {
-      const keep = item.container.active && item.roadProgress < this.projector.exitProgress;
+      const keep = item.container.active && item.roadDistance > this.projector.nearExitDistance;
       if (!keep && item.container.active) {
         item.container.destroy();
       }
@@ -200,7 +199,7 @@ export class GameScene extends Phaser.Scene {
 
     for (const side of [-1, 1] as const) {
       for (const point of this.projector.roadsideMarkerPoints(side, 8)) {
-        const lamp = this.visualFactory.createRoadsideLamp(side, point.progress);
+        const lamp = this.visualFactory.createRoadsideLamp(side, point.distance);
         this.projectRoadsideLamp(lamp);
         lamps.push(lamp);
       }
@@ -212,12 +211,11 @@ export class GameScene extends Phaser.Scene {
   private moveRoadsideLamps(deltaMs: number): void {
     const speedMultiplier = this.runState.isBoosting ? 1.12 : 1;
     const pixels = (this.runState.speed * speedMultiplier * deltaMs) / 1000;
+    const travelDistance = this.projector.roadTravelDistanceForPixels(pixels);
 
     for (const lamp of this.roadsideLamps) {
-      const progressDelta =
-        (pixels / (this.projector.bottomY - this.projector.horizonY)) *
-        this.projector.movementRateAtProgress(lamp.roadProgress);
-      lamp.roadProgress = this.projector.loopRoadsideProgress(lamp.roadProgress + progressDelta);
+      lamp.roadDistance = this.projector.advanceRoadDistance(lamp.roadDistance, travelDistance);
+      lamp.roadProgress = this.projector.distanceToProgress(lamp.roadDistance);
       this.projectRoadsideLamp(lamp);
     }
   }
@@ -240,7 +238,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private projectMovingItem(item: MovingVisualItem): void {
-    const projected = this.projector.projectLaneAtProgress(item.lane, item.roadProgress);
+    const projected = this.projector.projectLaneAtDistance(item.lane, item.roadDistance);
+    item.roadProgress = this.projector.distanceToProgress(item.roadDistance);
     item.container.x = projected.x;
     item.container.y = projected.y;
     item.container.setScale(projected.scale * ITEM_VISUAL_SCALE);
@@ -249,7 +248,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private projectRoadsideLamp(lamp: RoadsideLampVisual): void {
-    const projected = this.projector.projectLaneAtProgress(1, lamp.roadProgress);
+    const projected = this.projector.projectLaneAtDistance(1, lamp.roadDistance);
+    lamp.roadProgress = this.projector.distanceToProgress(lamp.roadDistance);
     lamp.container.x = this.projector.centerX + lamp.side * projected.laneSpacing * 1.72;
     lamp.container.y = projected.y;
     lamp.container.setScale(projected.scale);

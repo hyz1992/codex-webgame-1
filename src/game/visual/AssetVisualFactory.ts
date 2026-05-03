@@ -62,8 +62,9 @@ export class AssetVisualFactory {
       return this.fallback.createLaneItem(item);
     }
 
-    const roadProgress = this.projector.spawnProgress;
-    const projected = this.projector.projectLaneAtProgress(item.lane, roadProgress);
+    const roadDistance = this.projector.spawnDistance;
+    const roadProgress = this.projector.distanceToProgress(roadDistance);
+    const projected = this.projector.projectLaneAtDistance(item.lane, roadDistance);
     const container = this.scene.add.container(projected.x, projected.y);
     const hitArea = this.scene.add.rectangle(0, -asset.display.height / 2, asset.display.width, asset.display.height, 0xffffff, 0);
     const shadow = this.scene.add.ellipse(
@@ -80,7 +81,7 @@ export class AssetVisualFactory {
     container.add([shadow, sprite, hitArea]);
     container.setDepth(3);
     container.setScale(projected.scale * ITEM_VISUAL_SCALE);
-    return { ...item, container, hitArea, roadProgress };
+    return { ...item, container, hitArea, roadDistance, roadProgress };
   }
 
   private hasTexture(key: string): boolean {

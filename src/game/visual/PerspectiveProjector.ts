@@ -24,6 +24,7 @@ export interface TrackLanePoint {
 }
 
 export interface RoadsideMarkerPoint extends TrackLanePoint {
+  distance: number;
   scale: number;
 }
 
@@ -40,6 +41,11 @@ export class PerspectiveProjector {
   readonly nearScale = PROJECTED_NEAR_SCALE;
   readonly exitProgress = 1.18;
   readonly spawnProgress = 0.075;
+  readonly nearExitDistance = this.progressToDistance(this.exitProgress);
+  readonly spawnDistance = this.progressToDistance(this.spawnProgress);
+  readonly worldDistancePerScreenPixel =
+    (this.spawnDistance - this.nearExitDistance) /
+    ((this.exitProgress - this.spawnProgress) * (this.bottomY - this.horizonY));
   readonly spawnY = this.projectLaneAtProgress(1, this.spawnProgress).y;
 
   projectLane(lane: number, y: number): ProjectedLanePoint {
@@ -63,8 +69,20 @@ export class PerspectiveProjector {
     };
   }
 
-  movementRateAtProgress(_progress: number): number {
-    return 1;
+  projectLaneAtDistance(lane: number, distance: number): ProjectedLanePoint {
+    return this.projectLaneAtProgress(lane, this.distanceToProgress(distance));
+  }
+
+  progressToDistance(progress: number): number {
+    return this.nearDistance / Math.max(0.0001, progress);
+  }
+
+  distanceToProgress(distance: number): number {
+    return this.nearDistance / Math.max(1, distance);
+  }
+
+  roadTravelDistanceForPixels(pixels: number): number {
+    return pixels * this.worldDistancePerScreenPixel;
   }
 
   trackPolygon(): TrackPolygon {
@@ -104,15 +122,15 @@ export class PerspectiveProjector {
   roadsideMarkerPoints(side: -1 | 1, count: number): RoadsideMarkerPoint[] {
     const points: RoadsideMarkerPoint[] = [];
     const total = Math.max(1, count);
-    const steps = Math.max(1, total - 1);
-    const visibleNearProgress = 0.98;
+    const spacing = (this.spawnDistance - this.nearExitDistance) / total;
 
     for (let index = 0; index < total; index += 1) {
-      const t = index / steps;
-      const progress = this.lerp(this.spawnProgress, visibleNearProgress, t * t);
-      const projected = this.projectLaneAtProgress(1, progress);
+      const distance = this.spawnDistance - index * spacing;
+      const progress = this.distanceToProgress(distance);
+      const projected = this.projectLaneAtDistance(1, distance);
       points.push({
         progress,
+        distance,
         x: this.centerX + side * projected.laneSpacing * 1.72,
         y: projected.y,
         scale: projected.scale,
@@ -122,13 +140,15 @@ export class PerspectiveProjector {
     return points;
   }
 
-  loopRoadsideProgress(progress: number): number {
-    if (progress < this.exitProgress) {
-      return progress;
+  advanceRoadDistance(distance: number, travelDistance: number): number {
+    const range = this.spawnDistance - this.nearExitDistance;
+    let nextDistance = distance - travelDistance;
+
+    while (nextDistance < this.nearExitDistance) {
+      nextDistance += range;
     }
 
-    const range = this.exitProgress - this.spawnProgress;
-    return this.spawnProgress + ((progress - this.exitProgress) % range);
+    return nextDistance;
   }
 
   normalizedDepth(y: number): number {

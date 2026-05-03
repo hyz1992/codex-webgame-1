@@ -18,12 +18,14 @@ export interface PlayerVisual {
 export interface MovingVisualItem extends LaneItem {
   container: Phaser.GameObjects.Container;
   hitArea: Phaser.GameObjects.Rectangle;
+  roadDistance: number;
   roadProgress: number;
 }
 
 export interface RoadsideLampVisual {
   container: Phaser.GameObjects.Container;
   side: -1 | 1;
+  roadDistance: number;
   roadProgress: number;
 }
 
@@ -171,8 +173,9 @@ export class GameVisualFactory {
     const visual = getLaneItemVisual(item.kind);
     const fill = Number(visual.fill);
     const glow = Number(visual.glow);
-    const roadProgress = this.projector.spawnProgress;
-    const spawn = this.projector.projectLaneAtProgress(item.lane, roadProgress);
+    const roadDistance = this.projector.spawnDistance;
+    const roadProgress = this.projector.distanceToProgress(roadDistance);
+    const spawn = this.projector.projectLaneAtDistance(item.lane, roadDistance);
     const container = this.scene.add.container(spawn.x, spawn.y);
     const hitArea = this.scene.add.rectangle(0, -22, 44, 44, fill, 0);
     const profile = getObstacleVisualProfile(item.kind);
@@ -228,11 +231,12 @@ export class GameVisualFactory {
     container.add(hitArea);
     container.setDepth(3);
     container.setScale(spawn.scale * ITEM_VISUAL_SCALE);
-    return { ...item, container, hitArea, roadProgress };
+    return { ...item, container, hitArea, roadDistance, roadProgress };
   }
 
-  createRoadsideLamp(side: -1 | 1, roadProgress: number): RoadsideLampVisual {
-    const projected = this.projector.projectLaneAtProgress(1, roadProgress);
+  createRoadsideLamp(side: -1 | 1, roadDistance: number): RoadsideLampVisual {
+    const roadProgress = this.projector.distanceToProgress(roadDistance);
+    const projected = this.projector.projectLaneAtDistance(1, roadDistance);
     const lamp = this.scene.add.container(this.projector.centerX + side * projected.laneSpacing * 1.72, projected.y);
     const foot = this.scene.add.ellipse(0, 0, 20, 6, 0x020817, 0.22);
     const pole = this.scene.add.rectangle(0, -22, 3, 44, 0x18f7ff, 0.24);
@@ -245,7 +249,7 @@ export class GameVisualFactory {
     lamp.setDepth(2 + roadProgress);
     lamp.setScale(projected.scale);
     lamp.setAlpha(trackFarFadeAlpha(roadProgress, 0.85));
-    return { container: lamp, side, roadProgress };
+    return { container: lamp, side, roadDistance, roadProgress };
   }
 
   private strokeTrackCurve(graphics: Phaser.GameObjects.Graphics, edge: number, color: number, alpha: number, width: number): void {

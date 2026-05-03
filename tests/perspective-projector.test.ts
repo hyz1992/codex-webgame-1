@@ -123,16 +123,6 @@ describe('PerspectiveProjector', () => {
     expect(near.scale / spawn.scale).toBeCloseTo(nearOffset / spawnOffset, 4);
   });
 
-  it('keeps obstacles and roadside references moving at the same road-space rate', () => {
-    const projector = new PerspectiveProjector();
-    const earlyRate = projector.movementRateAtProgress(0.15);
-    const midRate = projector.movementRateAtProgress(0.5);
-    const lateRate = projector.movementRateAtProgress(0.85);
-
-    expect(earlyRate).toBeCloseTo(midRate, 5);
-    expect(midRate).toBeCloseTo(lateRate, 5);
-  });
-
   it('continues projecting objects below the near edge so they leave the screen smoothly', () => {
     const projector = new PerspectiveProjector();
     const nearEdge = projector.projectLaneAtProgress(1, 1);
@@ -159,10 +149,32 @@ describe('PerspectiveProjector', () => {
     expect(right[0].y).toBe(left[0].y);
   });
 
-  it('loops roadside markers from the near exit back to the far end', () => {
+  it('spaces roadside markers evenly in world distance instead of progress distance', () => {
     const projector = new PerspectiveProjector();
+    const points = projector.roadsideMarkerPoints(-1, 8);
+    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / points.length;
+    const gaps = points.slice(1).map((point, index) => points[index].distance - point.distance);
+    const wrapGap =
+      points[points.length - 1].distance - projector.nearExitDistance + projector.spawnDistance - points[0].distance;
 
-    expect(projector.loopRoadsideProgress(projector.exitProgress + 0.02)).toBeCloseTo(projector.spawnProgress + 0.02, 5);
-    expect(projector.loopRoadsideProgress(0.42)).toBe(0.42);
+    for (const gap of [...gaps, wrapGap]) {
+      expect(gap).toBeCloseTo(expectedGap, 5);
+    }
+  });
+
+  it('keeps roadside marker world spacing stable after player travel and loop wrap', () => {
+    const projector = new PerspectiveProjector();
+    const points = projector.roadsideMarkerPoints(-1, 8);
+    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / points.length;
+    const advanced = points
+      .map((point) => projector.advanceRoadDistance(point.distance, expectedGap * 1.35))
+      .sort((a, b) => b - a);
+    const gaps = advanced.slice(1).map((distance, index) => advanced[index] - distance);
+    const wrapGap =
+      advanced[advanced.length - 1] - projector.nearExitDistance + projector.spawnDistance - advanced[0];
+
+    for (const gap of [...gaps, wrapGap]) {
+      expect(gap).toBeCloseTo(expectedGap, 5);
+    }
   });
 });
