@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT } from '../src/game/config';
 import { PerspectiveProjector } from '../src/game/visual/PerspectiveProjector';
-import { PLAYER_ANCHOR_Y } from '../src/game/visual/layout';
+import {
+  MAIN_ROAD_EDGE_LANE_OFFSET,
+  PLAYER_ANCHOR_Y,
+  ROADSIDE_LAMP_LANE_OFFSET,
+} from '../src/game/visual/layout';
 
 describe('PerspectiveProjector', () => {
   it('远处轨道收束，近处轨道展开', () => {
@@ -40,9 +44,26 @@ describe('PerspectiveProjector', () => {
     const playerAnchor = projector.projectLane(1, PLAYER_ANCHOR_Y);
     const polygon = projector.trackPolygon();
 
-    expect(playerAnchor.scale).toBeGreaterThanOrEqual(1.55);
-    expect(playerAnchor.laneSpacing).toBeGreaterThanOrEqual(120);
-    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThanOrEqual(900);
+    expect(playerAnchor.scale).toBeGreaterThanOrEqual(1.7);
+    expect(playerAnchor.laneSpacing).toBeGreaterThanOrEqual(165);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeGreaterThanOrEqual(680);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(playerAnchor.laneSpacing * 4.2);
+  });
+
+  it('路灯贴着三股主路边缘，不再暗示额外辅道', () => {
+    const projector = new PerspectiveProjector();
+    const polygon = projector.trackPolygon();
+    const bottomLane = projector.projectLaneAtProgress(1, 1);
+    const leftLamp = projector.roadsideMarkerPoints(-1, 4)[3];
+    const rightLamp = projector.roadsideMarkerPoints(1, 4)[3];
+    const leftLampLane = projector.projectLaneAtDistance(1, leftLamp.distance);
+    const rightLampLane = projector.projectLaneAtDistance(1, rightLamp.distance);
+
+    expect(MAIN_ROAD_EDGE_LANE_OFFSET).toBe(1.5);
+    expect(ROADSIDE_LAMP_LANE_OFFSET).toBe(MAIN_ROAD_EDGE_LANE_OFFSET);
+    expect(polygon.bottomRight.x - polygon.bottomLeft.x).toBeLessThanOrEqual(bottomLane.laneSpacing * 3.3);
+    expect(leftLamp.x).toBeCloseTo(projector.centerX - leftLampLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
+    expect(rightLamp.x).toBeCloseTo(projector.centerX + rightLampLane.laneSpacing * MAIN_ROAD_EDGE_LANE_OFFSET, 5);
   });
 
   it('跑道从天边开始并在近端宽出屏幕边缘', () => {
@@ -86,8 +107,8 @@ describe('PerspectiveProjector', () => {
 
     expect(projector.spawnProgress).toBeLessThanOrEqual(0.08);
     expect(projector.spawnY).toBeLessThanOrEqual(projector.horizonY + 80);
-    expect(center.x - left.x).toBeLessThan(16);
-    expect(right.x - center.x).toBeLessThan(16);
+    expect(center.x - left.x).toBeLessThan(18);
+    expect(right.x - center.x).toBeLessThan(18);
     expect(nearCenter.x - nearLeft.x).toBeGreaterThan(center.x - left.x);
     expect(left.scale).toBeLessThan(0.55);
     expect(right.scale).toBeLessThan(0.55);

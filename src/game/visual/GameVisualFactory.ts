@@ -3,7 +3,13 @@ import { GAME_HEIGHT, GAME_WIDTH, LANE_X } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { getLaneItemVisual, neonSunsetTheme } from './theme';
 import { PerspectiveProjector } from './PerspectiveProjector';
-import { ITEM_GROUND_SHADOW_ALPHA, ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from './layout';
+import {
+  ITEM_GROUND_SHADOW_ALPHA,
+  ITEM_VISUAL_SCALE,
+  MAIN_ROAD_EDGE_LANE_OFFSET,
+  PLAYER_ANCHOR_Y,
+  ROADSIDE_LAMP_LANE_OFFSET,
+} from './layout';
 import { getObstacleVisualProfile } from './obstacleVisualProfile';
 
 export interface PlayerVisual {
@@ -110,7 +116,7 @@ export class GameVisualFactory {
     graphics.lineBetween(polygon.topRight.x, polygon.topRight.y, polygon.bottomRight.x, polygon.bottomRight.y);
     container.add(graphics);
 
-    for (const edge of [-1.5, 1.5] as const) {
+    for (const edge of [-MAIN_ROAD_EDGE_LANE_OFFSET, MAIN_ROAD_EDGE_LANE_OFFSET] as const) {
       this.strokeTrackCurve(graphics, edge, neonSunsetTheme.colors.lanePurple, 0.58, 4);
     }
 
@@ -254,7 +260,7 @@ export class GameVisualFactory {
   createRoadsideLamp(side: -1 | 1, roadDistance: number): RoadsideLampVisual {
     const roadProgress = this.projector.distanceToProgress(roadDistance);
     const projected = this.projector.projectLaneAtDistance(1, roadDistance);
-    const lamp = this.scene.add.container(this.projector.centerX + side * projected.laneSpacing * 1.72, projected.y);
+    const lamp = this.scene.add.container(this.projector.centerX + side * projected.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET, projected.y);
     const foot = this.scene.add.ellipse(0, 0, 20, 6, 0x020817, 0.22);
     const pole = this.scene.add.rectangle(0, -22, 3, 44, 0x18f7ff, 0.24);
     const halo = this.scene.add.circle(0, -44, 13, 0x18f7ff, 0.13);

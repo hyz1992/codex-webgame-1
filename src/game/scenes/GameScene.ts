@@ -15,7 +15,7 @@ import {
   type PlayerVisual,
   type RoadsideLampVisual,
 } from '../visual/GameVisualFactory';
-import { ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y } from '../visual/layout';
+import { ITEM_VISUAL_SCALE, PLAYER_ANCHOR_Y, ROADSIDE_LAMP_LANE_OFFSET } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
 import { playerRunPose } from '../visual/playerRunPose';
 import { neonSunsetTheme } from '../visual/theme';
@@ -276,7 +276,7 @@ export class GameScene extends Phaser.Scene {
   private projectRoadsideLamp(lamp: RoadsideLampVisual): void {
     const projected = this.projector.projectLaneAtDistance(1, lamp.roadDistance);
     lamp.roadProgress = this.projector.distanceToProgress(lamp.roadDistance);
-    lamp.container.x = this.projector.centerX + lamp.side * projected.laneSpacing * 1.72;
+    lamp.container.x = this.projector.centerX + lamp.side * projected.laneSpacing * ROADSIDE_LAMP_LANE_OFFSET;
     lamp.container.y = projected.y;
     lamp.container.setScale(projected.scale);
     lamp.container.setAlpha(projected.alpha * 0.85);

@@ -1,5 +1,11 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
-import { LANE_WORLD_SPACING_AT_NEAR, PROJECTED_NEAR_SCALE, TRACK_BOTTOM_EDGE_MULTIPLIER, TRACK_HORIZON_Y } from './layout';
+import {
+  LANE_WORLD_SPACING_AT_NEAR,
+  PROJECTED_NEAR_SCALE,
+  ROADSIDE_LAMP_LANE_OFFSET,
+  TRACK_BOTTOM_EDGE_MULTIPLIER,
+  TRACK_HORIZON_Y,
+} from './layout';
 
 export interface ProjectedLanePoint {
   x: number;
@@ -120,7 +126,7 @@ export class PerspectiveProjector {
   }
 
   roadsideMarkerPoints(side: -1 | 1, count: number): RoadsideMarkerPoint[] {
-    return this.distanceMarkerPoints(side * 1.72, count);
+    return this.distanceMarkerPoints(side * ROADSIDE_LAMP_LANE_OFFSET, count);
   }
 
   laneDashMarkerPoints(edge: -0.5 | 0.5, count: number): RoadsideMarkerPoint[] {
