@@ -21,6 +21,7 @@ import { playerRunPose } from '../visual/playerRunPose';
 import { neonSunsetTheme } from '../visual/theme';
 
 export const RUN_STATE_EVENT = 'run-state-change';
+export const DEBUG_HITBOX_OVERLAY_ENABLED = false;
 const GAME_ACTION_EVENT = 'game-action';
 
 export class GameScene extends Phaser.Scene {
@@ -60,7 +61,8 @@ export class GameScene extends Phaser.Scene {
     this.player = this.assetVisualFactory.createPlayer();
     this.effects = new EffectController(this);
     this.effects.createSpeedLines();
-    this.debugGraphics = this.debugModeEnabled ? this.add.graphics().setDepth(20) : undefined;
+    this.debugGraphics =
+      this.debugModeEnabled && DEBUG_HITBOX_OVERLAY_ENABLED ? this.add.graphics().setDepth(20) : undefined;
     this.publishState();
 
     this.bindActionHandler();
@@ -309,7 +311,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private drawDebugHitboxes(): void {
-    if (!this.debugGraphics) {
+    if (!DEBUG_HITBOX_OVERLAY_ENABLED || !this.debugGraphics) {
       return;
     }
 

@@ -60,4 +60,25 @@ describe('GameScene action events', () => {
 
     expect(handledActions).toEqual(['laneLeft']);
   });
+
+  it('does not draw hitbox rectangles while the debug overlay is temporarily disabled', async () => {
+    const { GameScene } = await import('../src/game/scenes/GameScene');
+    const scene = new GameScene();
+    const strokeRect = vi.fn();
+    const debugGraphics = {
+      clear: vi.fn(),
+      lineStyle: vi.fn(),
+      strokeRect,
+    };
+
+    Object.assign(scene as object, {
+      debugGraphics,
+      player: { hitArea: { getBounds: () => ({ x: 10, y: 20, width: 30, height: 40 }) } },
+      items: [],
+    });
+
+    (scene as unknown as { drawDebugHitboxes: () => void }).drawDebugHitboxes();
+
+    expect(strokeRect).not.toHaveBeenCalled();
+  });
 });
