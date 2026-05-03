@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { GAME_HEIGHT } from '../src/game/config';
 import { PerspectiveProjector } from '../src/game/visual/PerspectiveProjector';
 import {
+  LANE_SEPARATOR_OFFSET,
   MAIN_ROAD_EDGE_LANE_OFFSET,
   OUTER_ROAD_EDGE_LANE_OFFSET,
   PLAYER_ANCHOR_Y,
+  ROAD_REFERENCE_FAR_PROGRESS,
   ROAD_BUFFER_LANE_OFFSET,
   ROADSIDE_LAMP_LANE_OFFSET,
   TRACK_ENDPOINT_WIDTH_PROGRESS,
@@ -130,8 +132,8 @@ describe('PerspectiveProjector', () => {
     const visualHorizonLane = projector.projectLaneAtProgress(1, TRACK_VISUAL_HORIZON_PROGRESS);
 
     expect(TRACK_VISUAL_HORIZON_PROGRESS).toBe(TRACK_ENDPOINT_WIDTH_PROGRESS);
-    expect(topWidth).toBeGreaterThanOrEqual(9);
-    expect(topWidth).toBeLessThanOrEqual(14);
+    expect(topWidth).toBeGreaterThanOrEqual(5);
+    expect(topWidth).toBeLessThanOrEqual(8);
     expect(polygon.topLeft.x).toBeLessThan(projector.centerX);
     expect(polygon.topRight.x).toBeGreaterThan(projector.centerX);
     expect(projector.trackEdgeX(-OUTER_ROAD_EDGE_LANE_OFFSET, projector.horizonY)).toBeCloseTo(polygon.topLeft.x, 5);
@@ -226,15 +228,16 @@ describe('PerspectiveProjector', () => {
     expect(left[0].x).toBeLessThan(projector.centerX);
     expect(right[0].x).toBeGreaterThan(projector.centerX);
     expect(right[0].y).toBe(left[0].y);
+    expect(left[0].progress).toBe(ROAD_REFERENCE_FAR_PROGRESS);
   });
 
   it('spaces roadside markers evenly in world distance instead of progress distance', () => {
     const projector = new PerspectiveProjector();
     const points = projector.roadsideMarkerPoints(-1, 8);
-    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / points.length;
+    const expectedGap = (projector.markerSpawnDistance - projector.nearExitDistance) / points.length;
     const gaps = points.slice(1).map((point, index) => points[index].distance - point.distance);
     const wrapGap =
-      points[points.length - 1].distance - projector.nearExitDistance + projector.spawnDistance - points[0].distance;
+      points[points.length - 1].distance - projector.nearExitDistance + projector.markerSpawnDistance - points[0].distance;
 
     for (const gap of [...gaps, wrapGap]) {
       expect(gap).toBeCloseTo(expectedGap, 5);
@@ -244,13 +247,13 @@ describe('PerspectiveProjector', () => {
   it('keeps roadside marker world spacing stable after player travel and loop wrap', () => {
     const projector = new PerspectiveProjector();
     const points = projector.roadsideMarkerPoints(-1, 8);
-    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / points.length;
+    const expectedGap = (projector.markerSpawnDistance - projector.nearExitDistance) / points.length;
     const advanced = points
-      .map((point) => projector.advanceRoadDistance(point.distance, expectedGap * 1.35))
+      .map((point) => projector.advanceRoadDistance(point.distance, expectedGap * 1.35, projector.markerSpawnDistance))
       .sort((a, b) => b - a);
     const gaps = advanced.slice(1).map((distance, index) => advanced[index] - distance);
     const wrapGap =
-      advanced[advanced.length - 1] - projector.nearExitDistance + projector.spawnDistance - advanced[0];
+      advanced[advanced.length - 1] - projector.nearExitDistance + projector.markerSpawnDistance - advanced[0];
 
     for (const gap of [...gaps, wrapGap]) {
       expect(gap).toBeCloseTo(expectedGap, 5);
@@ -259,9 +262,9 @@ describe('PerspectiveProjector', () => {
 
   it('places lane dash markers on lane separators with stable world spacing', () => {
     const projector = new PerspectiveProjector();
-    const leftSeparator = projector.laneDashMarkerPoints(-0.5, 10);
-    const rightSeparator = projector.laneDashMarkerPoints(0.5, 10);
-    const expectedGap = (projector.spawnDistance - projector.nearExitDistance) / leftSeparator.length;
+    const leftSeparator = projector.laneDashMarkerPoints(-LANE_SEPARATOR_OFFSET, 10);
+    const rightSeparator = projector.laneDashMarkerPoints(LANE_SEPARATOR_OFFSET, 10);
+    const expectedGap = (projector.markerSpawnDistance - projector.nearExitDistance) / leftSeparator.length;
     const gaps = leftSeparator.slice(1).map((point, index) => leftSeparator[index].distance - point.distance);
 
     expect(leftSeparator).toHaveLength(10);
@@ -269,6 +272,7 @@ describe('PerspectiveProjector', () => {
     expect(leftSeparator[0].x).toBeLessThan(projector.centerX);
     expect(rightSeparator[0].x).toBeGreaterThan(projector.centerX);
     expect(leftSeparator[0].y).toBe(rightSeparator[0].y);
+    expect(LANE_SEPARATOR_OFFSET).toBeGreaterThan(0.5);
 
     for (const gap of gaps) {
       expect(gap).toBeCloseTo(expectedGap, 5);

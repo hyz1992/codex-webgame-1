@@ -39,7 +39,7 @@ export interface RoadsideLampVisual {
 
 export interface LaneDashVisual {
   line: Phaser.GameObjects.Line;
-  edge: -0.5 | 0.5;
+  edge: number;
   roadDistance: number;
   roadProgress: number;
 }
@@ -270,7 +270,7 @@ export class GameVisualFactory {
     return { container: lamp, side, roadDistance, roadProgress };
   }
 
-  createLaneDash(edge: -0.5 | 0.5, roadDistance: number): LaneDashVisual {
+  createLaneDash(edge: number, roadDistance: number): LaneDashVisual {
     const roadProgress = this.projector.distanceToProgress(roadDistance);
     const line = this.scene.add.line(0, 0, 0, 0, 0, 1, neonSunsetTheme.colors.laneCyan, 0.62);
     line.setOrigin(0, 0);
@@ -288,7 +288,9 @@ export class GameVisualFactory {
         continue;
       }
 
-      graphics.lineStyle(width, color, segmentAlpha);
+      const depthProgress = (previous.progress + point.progress) / 2;
+      const segmentWidth = Math.max(0.7, width * (0.26 + Math.sqrt(depthProgress) * 0.74));
+      graphics.lineStyle(segmentWidth, color, segmentAlpha);
       graphics.beginPath();
       graphics.moveTo(previous.x, previous.y);
       graphics.lineTo(point.x, point.y);

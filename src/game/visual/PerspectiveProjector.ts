@@ -2,6 +2,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import {
   LANE_WORLD_SPACING_AT_NEAR,
   PROJECTED_NEAR_SCALE,
+  ROAD_REFERENCE_FAR_PROGRESS,
   ROADSIDE_LAMP_LANE_OFFSET,
   TRACK_BOTTOM_EDGE_MULTIPLIER,
   TRACK_HORIZON_Y,
@@ -48,8 +49,10 @@ export class PerspectiveProjector {
   readonly nearScale = PROJECTED_NEAR_SCALE;
   readonly exitProgress = 1.18;
   readonly spawnProgress = 0.075;
+  readonly markerSpawnProgress = Math.max(ROAD_REFERENCE_FAR_PROGRESS, TRACK_VISUAL_HORIZON_PROGRESS);
   readonly nearExitDistance = this.progressToDistance(this.exitProgress);
   readonly spawnDistance = this.progressToDistance(this.spawnProgress);
+  readonly markerSpawnDistance = this.progressToDistance(this.markerSpawnProgress);
   readonly worldDistancePerScreenPixel =
     (this.spawnDistance - this.nearExitDistance) /
     ((this.exitProgress - this.spawnProgress) * (this.bottomY - this.horizonY));
@@ -130,17 +133,17 @@ export class PerspectiveProjector {
     return this.distanceMarkerPoints(side * ROADSIDE_LAMP_LANE_OFFSET, count);
   }
 
-  laneDashMarkerPoints(edge: -0.5 | 0.5, count: number): RoadsideMarkerPoint[] {
+  laneDashMarkerPoints(edge: number, count: number): RoadsideMarkerPoint[] {
     return this.distanceMarkerPoints(edge, count);
   }
 
   private distanceMarkerPoints(edge: number, count: number): RoadsideMarkerPoint[] {
     const points: RoadsideMarkerPoint[] = [];
     const total = Math.max(1, count);
-    const spacing = (this.spawnDistance - this.nearExitDistance) / total;
+    const spacing = (this.markerSpawnDistance - this.nearExitDistance) / total;
 
     for (let index = 0; index < total; index += 1) {
-      const distance = this.spawnDistance - index * spacing;
+      const distance = this.markerSpawnDistance - index * spacing;
       const progress = this.distanceToProgress(distance);
       const projected = this.projectLaneAtDistance(1, distance);
       points.push({
@@ -155,8 +158,8 @@ export class PerspectiveProjector {
     return points;
   }
 
-  advanceRoadDistance(distance: number, travelDistance: number): number {
-    const range = this.spawnDistance - this.nearExitDistance;
+  advanceRoadDistance(distance: number, travelDistance: number, farDistance = this.spawnDistance): number {
+    const range = farDistance - this.nearExitDistance;
     let nextDistance = distance - travelDistance;
 
     while (nextDistance < this.nearExitDistance) {
