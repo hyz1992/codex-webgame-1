@@ -30,7 +30,6 @@ export const gameAssetManifest = {
     path: '/assets/game/player-hover-bike-sheet.png',
     display: { width: 128, height: 160 },
     origin: { x: 0.5, y: 0.86 },
-    frame: { width: 384, height: 480 },
     kind: 'player',
   },
   backgrounds: [
@@ -139,12 +138,95 @@ export const playerAnimationKeys = {
   laneRight: 'player-hover-bike-lane-right',
 } as const;
 
+// 原始摩托图的每一列有效区域，x 已跳过蓝色网格线宽度。
+const playerGridColumns = [
+  { x: 3, width: 219 },
+  { x: 224, width: 219 },
+  { x: 445, width: 219 },
+  { x: 666, width: 220 },
+  { x: 888, width: 219 },
+  { x: 1109, width: 219 },
+  { x: 1330, width: 220 },
+  { x: 1552, width: 219 },
+] as const;
+
+// 原始摩托图的每一行动画区域，y 已跳过蓝色网格线宽度。
+const playerGridRows = [
+  { y: 3, height: 219 },
+  { y: 223, height: 219 },
+  { y: 444, height: 219 },
+  { y: 665, height: 219 },
+] as const;
+
 export const playerAnimationFrames = {
-  idle: { start: 0, end: 4, frameRate: 7, repeat: -1 },
-  boost: { start: 5, end: 12, frameRate: 14, repeat: -1 },
-  laneLeft: { start: 13, end: 18, frameRate: 24, repeat: 0 },
-  laneRight: { start: 19, end: 24, frameRate: 24, repeat: 0 },
+  idle: {
+    frames: ['player-idle-0', 'player-idle-1', 'player-idle-2', 'player-idle-3', 'player-idle-4'],
+    frameRate: 7,
+    repeat: -1,
+  },
+  boost: {
+    frames: [
+      'player-boost-0',
+      'player-boost-1',
+      'player-boost-2',
+      'player-boost-3',
+      'player-boost-4',
+      'player-boost-5',
+      'player-boost-6',
+      'player-boost-7',
+    ],
+    frameRate: 14,
+    repeat: -1,
+  },
+  laneLeft: {
+    frames: [
+      'player-lane-left-0',
+      'player-lane-left-1',
+      'player-lane-left-2',
+      'player-lane-left-3',
+      'player-lane-left-4',
+      'player-lane-left-5',
+    ],
+    frameRate: 24,
+    repeat: 0,
+  },
+  laneRight: {
+    frames: [
+      'player-lane-right-0',
+      'player-lane-right-1',
+      'player-lane-right-2',
+      'player-lane-right-3',
+      'player-lane-right-4',
+      'player-lane-right-5',
+    ],
+    frameRate: 24,
+    repeat: 0,
+  },
 } as const;
+
+// Phaser 运行时从原图注册这些裁剪帧，图片文件本身保持用户提供的原始版本。
+export const playerSourceFrames = [
+  ...playerAnimationFrames.idle.frames.map((name, index) => ({
+    name,
+    ...playerGridColumns[index],
+    ...playerGridRows[0],
+  })),
+  ...playerAnimationFrames.boost.frames.map((name, index) => ({
+    name,
+    ...playerGridColumns[index],
+    ...playerGridRows[1],
+  })),
+  ...playerAnimationFrames.laneLeft.frames.map((name, index) => ({
+    name,
+    ...playerGridColumns[index],
+    ...playerGridRows[2],
+  })),
+  ...playerAnimationFrames.laneRight.frames.map((name, index) => ({
+    name,
+    ...playerGridColumns[index],
+    ...playerGridRows[3],
+  })),
+] as const;
 
 export function getAllGameAssets(): GameAssetDefinition[] {
   return [

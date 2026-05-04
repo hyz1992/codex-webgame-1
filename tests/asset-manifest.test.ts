@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { gameAssetManifest, getLaneItemAsset } from '../src/game/assets/assetManifest';
+import { gameAssetManifest, getLaneItemAsset, playerSourceFrames } from '../src/game/assets/assetManifest';
 
 describe('gameAssetManifest', () => {
-  it('覆盖首批正式资产包要求的所有运行时图片', () => {
+  it('覆盖正式资源包需要的所有运行时图片', () => {
     expect(gameAssetManifest.player.key).toBe('player-hover-bike');
     expect(gameAssetManifest.player.path).toBe('/assets/game/player-hover-bike-sheet.png');
-    expect(gameAssetManifest.player.frame).toEqual({ width: 384, height: 480 });
+    expect('frame' in gameAssetManifest.player).toBe(false);
     expect(gameAssetManifest.player.display.width).toBeGreaterThanOrEqual(120);
     expect(gameAssetManifest.player.display.height).toBeGreaterThanOrEqual(150);
     expect(gameAssetManifest.backgrounds.map((asset) => asset.key)).toEqual(['bg-sunset-sky', 'bg-city-silhouette']);
@@ -19,6 +19,27 @@ describe('gameAssetManifest', () => {
       'beam',
       'hazard',
     ]);
+  });
+
+  it('直接使用原始摩托网格图，并用裁剪矩形排除网格线', () => {
+    expect(playerSourceFrames).toHaveLength(25);
+    expect(playerSourceFrames[0]).toEqual({ name: 'player-idle-0', x: 3, y: 3, width: 219, height: 219 });
+    expect(playerSourceFrames[4]).toEqual({ name: 'player-idle-4', x: 888, y: 3, width: 219, height: 219 });
+    expect(playerSourceFrames[5]).toEqual({ name: 'player-boost-0', x: 3, y: 223, width: 219, height: 219 });
+    expect(playerSourceFrames[18]).toEqual({
+      name: 'player-lane-left-5',
+      x: 1109,
+      y: 444,
+      width: 219,
+      height: 219,
+    });
+    expect(playerSourceFrames[24]).toEqual({
+      name: 'player-lane-right-5',
+      x: 1109,
+      y: 665,
+      width: 219,
+      height: 219,
+    });
   });
 
   it('所有运行时资源都来自 public/assets/game 并使用 PNG', () => {
@@ -37,7 +58,7 @@ describe('gameAssetManifest', () => {
     }
   });
 
-  it('可根据 LaneItem kind 找到稳定的图片资产', () => {
+  it('可根据 LaneItem kind 找到稳定的图片资源', () => {
     expect(getLaneItemAsset('energy').key).toBe('item-energy');
     expect(getLaneItemAsset('lowFence').key).toBe('obstacle-low-fence');
     expect(getLaneItemAsset('hazard').path).toBe('/assets/game/obstacle-hazard.png');

@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
-import { gameAssetManifest, getLaneItemAsset, playerAnimationFrames, playerAnimationKeys } from '../assets/assetManifest';
+import {
+  gameAssetManifest,
+  getLaneItemAsset,
+  playerAnimationFrames,
+  playerAnimationKeys,
+  playerSourceFrames,
+} from '../assets/assetManifest';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { LaneItem } from '../spawn/patterns';
 import { GameVisualFactory, type MovingVisualItem, type PlayerVisual } from './GameVisualFactory';
@@ -49,7 +55,7 @@ export class AssetVisualFactory {
       part.setVisible(false);
     }
     this.ensurePlayerAnimations();
-    const sprite = this.scene.add.sprite(0, 0, gameAssetManifest.player.key, playerAnimationFrames.idle.start);
+    const sprite = this.scene.add.sprite(0, 0, gameAssetManifest.player.key, playerAnimationFrames.idle.frames[0]);
     sprite.setDisplaySize(gameAssetManifest.player.display.width, gameAssetManifest.player.display.height);
     sprite.setOrigin(gameAssetManifest.player.origin.x, gameAssetManifest.player.origin.y);
     sprite.play(playerAnimationKeys.idle);
@@ -95,6 +101,8 @@ export class AssetVisualFactory {
   }
 
   private ensurePlayerAnimations(): void {
+    this.ensurePlayerTextureFrames();
+
     for (const [name, frames] of Object.entries(playerAnimationFrames)) {
       const key = playerAnimationKeys[name as keyof typeof playerAnimationKeys];
       if (this.scene.anims.exists(key)) {
@@ -103,13 +111,24 @@ export class AssetVisualFactory {
 
       this.scene.anims.create({
         key,
-        frames: this.scene.anims.generateFrameNumbers(gameAssetManifest.player.key, {
-          start: frames.start,
-          end: frames.end,
-        }),
+        frames: frames.frames.map((frame) => ({
+          key: gameAssetManifest.player.key,
+          frame,
+        })),
         frameRate: frames.frameRate,
         repeat: frames.repeat,
       });
+    }
+  }
+
+  private ensurePlayerTextureFrames(): void {
+    const texture = this.scene.textures.get(gameAssetManifest.player.key);
+    for (const frame of playerSourceFrames) {
+      if (texture.has(frame.name)) {
+        continue;
+      }
+
+      texture.add(frame.name, 0, frame.x, frame.y, frame.width, frame.height);
     }
   }
 }
