@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { gameAssetManifest, getLaneItemAsset, playerSourceFrames } from '../src/game/assets/assetManifest';
+import {
+  gameAssetManifest,
+  getLaneItemAsset,
+  playerAnimationFrames,
+  playerSourceFrames,
+} from '../src/game/assets/assetManifest';
 
 describe('gameAssetManifest', () => {
   it('覆盖正式资源包需要的所有运行时图片', () => {
@@ -22,24 +27,31 @@ describe('gameAssetManifest', () => {
   });
 
   it('直接使用原始摩托网格图，并用裁剪矩形排除网格线', () => {
-    expect(playerSourceFrames).toHaveLength(25);
+    expect(playerSourceFrames).toHaveLength(21);
     expect(playerSourceFrames[0]).toEqual({ name: 'player-idle-0', x: 3, y: 3, width: 219, height: 219 });
     expect(playerSourceFrames[4]).toEqual({ name: 'player-idle-4', x: 888, y: 3, width: 219, height: 219 });
     expect(playerSourceFrames[5]).toEqual({ name: 'player-boost-0', x: 3, y: 223, width: 219, height: 219 });
-    expect(playerSourceFrames[18]).toEqual({
-      name: 'player-lane-left-5',
-      x: 1109,
+    expect(playerSourceFrames[16]).toEqual({
+      name: 'player-lane-left-3',
+      x: 666,
       y: 444,
-      width: 219,
+      width: 220,
       height: 219,
     });
-    expect(playerSourceFrames[24]).toEqual({
-      name: 'player-lane-right-5',
-      x: 1109,
+    expect(playerSourceFrames[20]).toEqual({
+      name: 'player-lane-right-3',
+      x: 666,
       y: 665,
-      width: 219,
+      width: 220,
       height: 219,
     });
+  });
+
+  it('左右变道动画保持 4 帧，减少横移动作拖沓感', () => {
+    expect(playerAnimationFrames.laneLeft.frames).toHaveLength(4);
+    expect(playerAnimationFrames.laneRight.frames).toHaveLength(4);
+    expect(playerAnimationFrames.laneLeft.repeat).toBe(0);
+    expect(playerAnimationFrames.laneRight.repeat).toBe(0);
   });
 
   it('所有运行时资源都来自 public/assets/game 并使用 PNG', () => {
