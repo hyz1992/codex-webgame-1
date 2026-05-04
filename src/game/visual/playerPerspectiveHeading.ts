@@ -1,5 +1,5 @@
 // 主角在左右车道时朝向道路消失点的最大旋转角，避免贴边时转得过头。
-export const PLAYER_HEADING_MAX_DEGREES = 9;
+export const PLAYER_HEADING_MAX_DEGREES = 19;
 
 export interface PlayerPerspectiveHeadingInput {
   playerX: number;
