@@ -142,8 +142,8 @@ export const playerAnimationKeys = {
 export const playerAnimationFrames = {
   idle: { start: 0, end: 4, frameRate: 7, repeat: -1 },
   boost: { start: 5, end: 12, frameRate: 14, repeat: -1 },
-  laneLeft: { start: 14, end: 17, frameRate: 24, repeat: 0 },
-  laneRight: { start: 24, end: 27, frameRate: 24, repeat: 0 },
+  laneLeft: { start: 13, end: 18, frameRate: 24, repeat: 0 },
+  laneRight: { start: 19, end: 24, frameRate: 24, repeat: 0 },
 } as const;
 
 export function getAllGameAssets(): GameAssetDefinition[] {
