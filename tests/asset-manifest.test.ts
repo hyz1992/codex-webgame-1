@@ -75,4 +75,19 @@ describe('gameAssetManifest', () => {
     expect(getLaneItemAsset('lowFence').key).toBe('obstacle-low-fence');
     expect(getLaneItemAsset('hazard').path).toBe('/assets/game/obstacle-hazard.png');
   });
+
+  it('道具足够清晰，障碍物以底部锚点贴合路面', () => {
+    for (const kind of ['energy', 'shield', 'boost'] as const) {
+      const asset = getLaneItemAsset(kind);
+      expect(asset.display.width).toBeGreaterThanOrEqual(54);
+      expect(asset.display.height).toBeGreaterThanOrEqual(54);
+    }
+
+    for (const kind of ['barrier', 'lowFence', 'beam', 'hazard'] as const) {
+      const asset = getLaneItemAsset(kind);
+      expect(asset.origin.y).toBe(1);
+      expect(asset.display.width).toBeGreaterThanOrEqual(70);
+      expect(asset.display.height).toBeGreaterThanOrEqual(62);
+    }
+  });
 });
