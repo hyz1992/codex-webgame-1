@@ -19,6 +19,7 @@ import {
 } from '../visual/GameVisualFactory';
 import { ITEM_VISUAL_SCALE, LANE_SEPARATOR_OFFSET, PLAYER_ANCHOR_Y, ROADSIDE_LAMP_LANE_OFFSET } from '../visual/layout';
 import { PerspectiveProjector } from '../visual/PerspectiveProjector';
+import { calculatePlayerPerspectiveHeading } from '../visual/playerPerspectiveHeading';
 import { playerRunPose } from '../visual/playerRunPose';
 import { neonSunsetTheme } from '../visual/theme';
 
@@ -279,7 +280,23 @@ export class GameScene extends Phaser.Scene {
     this.player.container.y = projected.y + pose.yOffset;
     this.player.container.setScale(projected.scale * pose.scalePulse, projected.scale);
     this.player.container.setDepth(6);
+    this.syncPlayerPerspectiveHeading();
     this.playPlayerCruiseAnimation();
+  }
+
+  private syncPlayerPerspectiveHeading(): void {
+    if (!this.player.sprite) {
+      return;
+    }
+
+    this.player.sprite.setRotation(
+      calculatePlayerPerspectiveHeading({
+        playerX: this.player.container.x,
+        playerY: this.player.container.y,
+        vanishX: this.projector.centerX,
+        vanishY: this.projector.horizonY,
+      }),
+    );
   }
 
   private playPlayerLaneChangeAnimation(action: GameAction): void {
