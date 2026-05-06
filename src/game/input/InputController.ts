@@ -27,9 +27,8 @@ export function detectPointerGesture(
     const relY = start.y - targetTop;
     if (relY > targetHeight * 0.5) {
       const relX = start.x - targetLeft;
-      if (relX < targetWidth * 0.4) return 'laneLeft';
-      if (relX > targetWidth * 0.6) return 'laneRight';
-      return null;
+      if (relX < targetWidth * 0.5) return 'laneLeft';
+      return 'laneRight';
     }
     return 'confirm';
   }

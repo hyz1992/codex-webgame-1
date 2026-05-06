@@ -35,7 +35,7 @@ let debugPanel: DebugPanel | null = null;
 const sendAction = (action: GameAction): void => {
   debugPanel?.recordInput(action);
 
-  if (action === 'confirm' && !document.fullscreenElement) {
+  if (action === 'confirm' && !document.fullscreenElement && navigator.maxTouchPoints > 0) {
     document.documentElement.requestFullscreen().then(() => {
       (screen.orientation as unknown as { lock: (orientation: string) => Promise<void> }).lock('portrait').catch(() => {});
     }).catch(() => {});

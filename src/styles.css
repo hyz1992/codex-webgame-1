@@ -53,6 +53,21 @@ body {
     0 0 44px rgba(24, 247, 255, 0.12);
 }
 
+:root:fullscreen #phone-frame,
+:root:-webkit-full-screen #phone-frame {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  box-shadow: none;
+}
+
+:root:fullscreen #game-root canvas,
+:root:-webkit-full-screen #game-root canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 #loading-root {
   position: absolute;
   inset: 0;

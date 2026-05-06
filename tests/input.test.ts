@@ -13,22 +13,22 @@ describe('detectPointerGesture', () => {
     expect(detectPointerGesture({ x: 100, y: 100, time: 0 }, { x: 170, y: 100, time: 900 }, 800, 400, 0, 0)).toBe(null);
   });
 
-  it('屏幕下半部分短距离点击：左侧换左道，右侧换右道，中间不触发', () => {
+  it('屏幕下半部分短距离点击：左半换左道，右半换右道', () => {
     const vh = 800;
     const vw = 400;
     const bottomY = vh * 0.6;
 
     expect(detectPointerGesture({ x: vw * 0.1, y: bottomY, time: 0 }, { x: vw * 0.1 + 5, y: bottomY + 3, time: 120 }, vw, vh, 0, 0)).toBe('laneLeft');
     expect(detectPointerGesture({ x: vw * 0.8, y: bottomY, time: 0 }, { x: vw * 0.8 + 3, y: bottomY + 2, time: 120 }, vw, vh, 0, 0)).toBe('laneRight');
-    expect(detectPointerGesture({ x: vw * 0.5, y: bottomY, time: 0 }, { x: vw * 0.5 + 2, y: bottomY + 1, time: 120 }, vw, vh, 0, 0)).toBe(null);
+    expect(detectPointerGesture({ x: vw * 0.3, y: bottomY, time: 0 }, { x: vw * 0.3 + 2, y: bottomY + 1, time: 120 }, vw, vh, 0, 0)).toBe('laneLeft');
   });
 
   it('屏幕上半部分短距离点击触发 confirm', () => {
     expect(detectPointerGesture({ x: 100, y: 100, time: 0 }, { x: 110, y: 106, time: 120 }, 800, 400, 0, 0)).toBe('confirm');
   });
 
-  it('屏幕下半部分中间区域短距离点击不触发任何动作', () => {
-    expect(detectPointerGesture({ x: 200, y: 600, time: 0 }, { x: 205, y: 603, time: 100 }, 400, 800, 0, 0)).toBe(null);
+  it('屏幕下半部分正中间短距离点击触发 laneRight', () => {
+    expect(detectPointerGesture({ x: 200, y: 600, time: 0 }, { x: 205, y: 603, time: 100 }, 400, 800, 0, 0)).toBe('laneRight');
   });
 });
 
