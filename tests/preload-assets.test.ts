@@ -12,7 +12,7 @@ describe('preloadGameAssets', () => {
 
     expect(image).toHaveBeenCalledTimes(getAllGameAssets().length);
     expect(spritesheet).not.toHaveBeenCalled();
-    expect(image).toHaveBeenCalledWith('player-hover-bike', '/assets/game/player-hover-bike-sheet.png');
-    expect(image).toHaveBeenCalledWith('obstacle-hazard', '/assets/game/obstacle-hazard.png');
+    expect(image).toHaveBeenCalledWith('player-hover-bike', './assets/game/player-hover-bike-sheet.png');
+    expect(image).toHaveBeenCalledWith('obstacle-hazard', './assets/game/obstacle-hazard.png');
   });
 });

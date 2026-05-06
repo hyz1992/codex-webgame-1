@@ -4,7 +4,7 @@ export type GameAssetKind = 'player' | 'background' | 'track' | 'item';
 
 export interface GameAssetDefinition {
   key: string;
-  path: `/assets/game/${string}.png`;
+  path: `./assets/game/${string}.png`;
   display: {
     width: number;
     height: number;
@@ -27,7 +27,7 @@ export interface LaneItemAssetDefinition extends GameAssetDefinition {
 export const gameAssetManifest = {
   player: {
     key: 'player-hover-bike',
-    path: '/assets/game/player-hover-bike-sheet.png',
+    path: './assets/game/player-hover-bike-sheet.png',
     display: { width: 128, height: 160 },
     origin: { x: 0.5, y: 0.86 },
     kind: 'player',
@@ -35,14 +35,14 @@ export const gameAssetManifest = {
   backgrounds: [
     {
       key: 'bg-sunset-sky',
-      path: '/assets/game/bg-sunset-sky.png',
+      path: './assets/game/bg-sunset-sky.png',
       display: { width: 390, height: 844 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'background',
     },
     {
       key: 'bg-city-silhouette',
-      path: '/assets/game/bg-city-silhouette.png',
+      path: './assets/game/bg-city-silhouette.png',
       display: { width: 390, height: 844 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'background',
@@ -51,14 +51,14 @@ export const gameAssetManifest = {
   track: [
     {
       key: 'track-edge-glow',
-      path: '/assets/game/track-edge-glow.png',
+      path: './assets/game/track-edge-glow.png',
       display: { width: 64, height: 844 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'track',
     },
     {
       key: 'track-speed-grid',
-      path: '/assets/game/track-speed-grid.png',
+      path: './assets/game/track-speed-grid.png',
       display: { width: 290, height: 256 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'track',
@@ -67,7 +67,7 @@ export const gameAssetManifest = {
   items: [
     {
       key: 'item-energy',
-      path: '/assets/game/item-energy.png',
+      path: './assets/game/item-energy.png',
       display: { width: 58, height: 58 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'item',
@@ -75,7 +75,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'item-shield',
-      path: '/assets/game/item-shield.png',
+      path: './assets/game/item-shield.png',
       display: { width: 62, height: 62 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'item',
@@ -83,7 +83,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'item-boost',
-      path: '/assets/game/item-boost.png',
+      path: './assets/game/item-boost.png',
       display: { width: 64, height: 58 },
       origin: { x: 0.5, y: 0.5 },
       kind: 'item',
@@ -91,7 +91,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'obstacle-barrier',
-      path: '/assets/game/obstacle-barrier.png',
+      path: './assets/game/obstacle-barrier.png',
       display: { width: 84, height: 78 },
       origin: { x: 0.5, y: 1 },
       kind: 'item',
@@ -99,7 +99,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'obstacle-low-fence',
-      path: '/assets/game/obstacle-low-fence.png',
+      path: './assets/game/obstacle-low-fence.png',
       display: { width: 86, height: 76 },
       origin: { x: 0.5, y: 1 },
       kind: 'item',
@@ -107,7 +107,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'obstacle-beam',
-      path: '/assets/game/obstacle-beam.png',
+      path: './assets/game/obstacle-beam.png',
       display: { width: 86, height: 76 },
       origin: { x: 0.5, y: 1 },
       kind: 'item',
@@ -115,7 +115,7 @@ export const gameAssetManifest = {
     },
     {
       key: 'obstacle-hazard',
-      path: '/assets/game/obstacle-hazard.png',
+      path: './assets/game/obstacle-hazard.png',
       display: { width: 78, height: 78 },
       origin: { x: 0.5, y: 1 },
       kind: 'item',

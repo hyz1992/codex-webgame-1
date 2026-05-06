@@ -9,7 +9,7 @@ import {
 describe('gameAssetManifest', () => {
   it('覆盖正式资源包需要的所有运行时图片', () => {
     expect(gameAssetManifest.player.key).toBe('player-hover-bike');
-    expect(gameAssetManifest.player.path).toBe('/assets/game/player-hover-bike-sheet.png');
+    expect(gameAssetManifest.player.path).toBe('./assets/game/player-hover-bike-sheet.png');
     expect('frame' in gameAssetManifest.player).toBe(false);
     expect(gameAssetManifest.player.display.width).toBeGreaterThanOrEqual(120);
     expect(gameAssetManifest.player.display.height).toBeGreaterThanOrEqual(150);
@@ -63,7 +63,7 @@ describe('gameAssetManifest', () => {
     ];
 
     for (const asset of assets) {
-      expect(asset.path).toMatch(/^\/assets\/game\/.+\.png$/);
+      expect(asset.path).toMatch(/^\.\/assets\/game\/.+\.png$/);
       expect(asset.key.length).toBeGreaterThan(0);
       expect(asset.display.width).toBeGreaterThan(0);
       expect(asset.display.height).toBeGreaterThan(0);
@@ -73,7 +73,7 @@ describe('gameAssetManifest', () => {
   it('可根据 LaneItem kind 找到稳定的图片资源', () => {
     expect(getLaneItemAsset('energy').key).toBe('item-energy');
     expect(getLaneItemAsset('lowFence').key).toBe('obstacle-low-fence');
-    expect(getLaneItemAsset('hazard').path).toBe('/assets/game/obstacle-hazard.png');
+    expect(getLaneItemAsset('hazard').path).toBe('./assets/game/obstacle-hazard.png');
   });
 
   it('道具足够清晰，障碍物以底部锚点贴合路面', () => {
