@@ -53,6 +53,49 @@ body {
     0 0 44px rgba(24, 247, 255, 0.12);
 }
 
+#loading-root {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--color-night);
+  transition: opacity 400ms ease-out;
+}
+
+#loading-root.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-bar-track {
+  width: 60%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(248, 250, 252, 0.12);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+.loading-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-cyan), var(--color-purple));
+  box-shadow: 0 0 16px rgba(24, 247, 255, 0.6);
+  transition: width 200ms ease-out;
+}
+
+.loading-percent {
+  font-size: 18px;
+  font-weight: 850;
+  color: var(--color-muted);
+  text-shadow: 0 0 12px rgba(24, 247, 255, 0.3);
+}
+
 #game-root,
 #hud-root {
   position: absolute;

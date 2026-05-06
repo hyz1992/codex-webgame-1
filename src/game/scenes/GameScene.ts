@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT } from '../config';
 import type { GameAction } from '../actions';
-import { preloadGameAssets } from '../assets/preloadGameAssets';
 import { playerAnimationKeys } from '../assets/assetManifest';
 import { LaneController } from '../lane/LaneController';
 import { addDistance, createInitialRunState, resetRun, startRun, tickBoost, type RunState } from '../state';
@@ -56,7 +55,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload(): void {
-    preloadGameAssets(this);
+    // 资源已在 BootScene 中加载
   }
 
   create(): void {

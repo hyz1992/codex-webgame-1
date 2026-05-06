@@ -3,6 +3,7 @@ import './styles.css';
 import { GAME_HEIGHT, GAME_WIDTH } from './game/config';
 import { InputController } from './game/input/InputController';
 import { GameScene, RUN_STATE_EVENT } from './game/scenes/GameScene';
+import { BootScene } from './game/scenes/BootScene';
 import type { GameAction } from './game/actions';
 import type { RunState } from './game/state';
 import { HudOverlay } from './ui/HudOverlay';
@@ -26,7 +27,7 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [GameScene],
+  scene: [BootScene, GameScene],
 });
 
 let debugPanel: DebugPanel | null = null;
