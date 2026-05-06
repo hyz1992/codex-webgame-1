@@ -12,8 +12,10 @@ export type ActionListener = (action: GameAction) => void;
 export function detectPointerGesture(
   start: PointerSample,
   end: PointerSample,
-  viewportWidth: number,
-  viewportHeight: number,
+  targetWidth: number,
+  targetHeight: number,
+  targetLeft: number,
+  targetTop: number,
 ): GameAction | null {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
@@ -22,10 +24,11 @@ export function detectPointerGesture(
   const elapsed = end.time - start.time;
 
   if (absX < GESTURE_MIN_DISTANCE && absY < GESTURE_MIN_DISTANCE) {
-    if (start.y > viewportHeight * 0.5) {
-      const relativeX = start.x / viewportWidth;
-      if (relativeX < 0.4) return 'laneLeft';
-      if (relativeX > 0.6) return 'laneRight';
+    const relY = start.y - targetTop;
+    if (relY > targetHeight * 0.5) {
+      const relX = start.x - targetLeft;
+      if (relX < targetWidth * 0.4) return 'laneLeft';
+      if (relX > targetWidth * 0.6) return 'laneRight';
       return null;
     }
     return 'confirm';
@@ -75,6 +78,7 @@ export class InputController {
       return;
     }
 
+    const rect = this.target.getBoundingClientRect();
     const action = detectPointerGesture(
       this.pointerStart,
       {
@@ -82,8 +86,10 @@ export class InputController {
         y: event.clientY,
         time: performance.now(),
       },
-      window.innerWidth,
-      window.innerHeight,
+      rect.width,
+      rect.height,
+      rect.left,
+      rect.top,
     );
 
     this.pointerStart = null;
