@@ -60,10 +60,20 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding-bottom: 28%;
   gap: 14px;
   background: var(--color-night);
   transition: opacity 400ms ease-out;
+}
+
+.loading-title {
+  position: absolute;
+  top: 28%;
+  margin: 0;
+  font-size: 38px;
+  letter-spacing: 0;
+  text-shadow: 0 0 22px rgba(24, 247, 255, 0.34);
 }
 
 #loading-root.fade-out {

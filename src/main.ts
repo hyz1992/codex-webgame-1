@@ -36,7 +36,9 @@ const sendAction = (action: GameAction): void => {
   debugPanel?.recordInput(action);
 
   if (action === 'confirm' && !document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
+    document.documentElement.requestFullscreen().then(() => {
+      (screen.orientation as unknown as { lock: (orientation: string) => Promise<void> }).lock('portrait').catch(() => {});
+    }).catch(() => {});
   }
 
   const scene = game.scene.getScene('GameScene');
