@@ -33,6 +33,11 @@ let debugPanel: DebugPanel | null = null;
 
 const sendAction = (action: GameAction): void => {
   debugPanel?.recordInput(action);
+
+  if (action === 'confirm' && !document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+
   const scene = game.scene.getScene('GameScene');
   scene.events.emit('game-action', action);
 };
