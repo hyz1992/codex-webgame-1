@@ -24,8 +24,14 @@ export class BootScene extends Phaser.Scene {
   create(): void {
     const loadingRoot = document.querySelector<HTMLElement>(LOADING_ROOT);
     if (loadingRoot) {
+      const remove = () => {
+        loadingRoot.removeEventListener('transitionend', remove);
+        clearTimeout(fallback);
+        loadingRoot.remove();
+      };
       loadingRoot.classList.add('fade-out');
-      loadingRoot.addEventListener('transitionend', () => loadingRoot.remove());
+      loadingRoot.addEventListener('transitionend', remove);
+      const fallback = setTimeout(remove, 600);
     }
 
     this.scene.start('GameScene');
